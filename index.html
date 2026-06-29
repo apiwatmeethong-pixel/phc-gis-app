@@ -623,6 +623,11 @@
             <input type="text" id="addHouseNo" class="form-control" placeholder="เช่น 123/4">
           </div>
           <div class="mb-3">
+  <label class="form-label fw-bold text-primary">รหัสประจำบ้าน 11 หลัก <span class="text-danger">*</span></label>
+  <input type="text" id="addHouseId11" class="form-control border-primary" placeholder="ระบุตัวเลข 11 หลัก (ห้ามเว้นวรรค/ขีด)" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+  <div class="form-text">เฉพาะตัวเลขเท่านั้น จำเป็นต้องกรอกเพื่อบันทึกข้อมูล</div>
+</div>
+          <div class="mb-3">
             <label class="form-label fw-bold">อสม. ผู้รับผิดชอบ (ถ้ามี)</label>
             <select id="addHouseAsm" class="form-select">
               <option value="">-- รอเลือกชุมชน --</option>
@@ -1156,31 +1161,51 @@
     }
 
     async function processAddHouse(btn) {
-      var moo = document.getElementById('addHouseMoo').value;
-      var comm = document.getElementById('addHouseComm').value;
-      var houseNo = document.getElementById('addHouseNo').value.trim();
-      var asm = document.getElementById('addHouseAsm').value.trim();
+  var moo = document.getElementById('addHouseMoo').value;
+  var comm = document.getElementById('addHouseComm').value;
+  var houseNo = document.getElementById('addHouseNo').value.trim();
+  var asm = document.getElementById('addHouseAsm').value.trim();
+  
+  // 🌟 ดึงค่า 11 หลัก
+  var houseId11 = document.getElementById('addHouseId11').value.trim();
 
-      if (!moo || !comm || !houseNo) {
-        alert("กรุณากรอก หมู่, ชุมชน และ บ้านเลขที่ ให้ครบถ้วน!");
-        return;
-      }
+  // 🌟 ตรวจสอบว่ากรอกครบและรหัสครบ 11 หลักหรือไม่ก่อนยิง API
+  if (!moo || !comm || !houseNo || !houseId11) {
+    alert("กรุณากรอก หมู่, ชุมชน, บ้านเลขที่ และ รหัสประจำบ้าน ให้ครบถ้วน!");
+    return;
+  }
+  if (houseId11.length !== 11) {
+    alert("⚠️ รหัสประจำบ้านต้องมี 11 หลักพอดี (ปัจจุบันกรอกมา " + houseId11.length + " หลัก)");
+    return;
+  }
 
-      btn.disabled = true;
-      btn.innerHTML = "กำลังบันทึก...";
+  btn.disabled = true;
+  btn.innerHTML = "กำลังบันทึก...";
 
-      var res = await callAPI("addNewHouse", { houseNo: houseNo, moo: moo, comm: comm, asm: asm });
-      if(res && res.success) {
-        alert(res.message || "บันทึกเรียบร้อย");
-        addHouseModal.hide();
-        await loadHouseData();
-      } else {
-        alert((res && res.message) ? res.message : "บันทึกไม่สำเร็จ");
-      }
+  // 🌟 เพิ่ม houseId11 เข้าไปใน payload (ข้อมูลที่ส่งไป API)
+  var res = await callAPI("addNewHouse", { 
+    houseNo: houseNo, 
+    moo: moo, 
+    comm: comm, 
+    asm: asm, 
+    houseId11: houseId11 
+  });
 
-      btn.disabled = false;
-      btn.innerHTML = '<i class="bi bi-save"></i> บันทึกข้อมูล';
-    }
+  if(res && res.success) {
+    alert(res.message || "บันทึกเรียบร้อย");
+    addHouseModal.hide();
+    
+    // เคลียร์ค่ารหัส 11 หลักเผื่อเพิ่มหลังต่อไป
+    document.getElementById('addHouseId11').value = ''; 
+    
+    await loadHouseData();
+  } else {
+    alert((res && res.message) ? res.message : "บันทึกไม่สำเร็จ");
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="bi bi-save"></i> บันทึกข้อมูล';
+}
 
     // ==========================================
     // 6. Dashboard & แผนที่
