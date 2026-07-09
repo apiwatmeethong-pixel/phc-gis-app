@@ -684,7 +684,7 @@
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label fw-bold small">Password</label>
-              <input type="text" id="passwordInput" class="form-control" placeholder="กำหนดรหัสผ่าน">
+              <input type="password" id="passwordInput" class="form-control" placeholder="กำหนดรหัสผ่าน" autocomplete="new-password">
             </div>
           </div>
           <div class="mb-3">
@@ -713,7 +713,7 @@
     // ==========================================
     // 0. API CONFIG / FETCH HELPER
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbz_6VDTEvxPvk1x7pfubsCSIocers5WkGqaV70wZPQqqU_zIF0ScRJHkGdrh7MFr7ODRg/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzBCWPR8MXq79UMFIa05VBfRGJDeKTyXign4w-uC7LDoY4xrkAPij-Ku6UuVPr1JdcCXA/exec";
     const API_KEY = "Tph-Osm-Gis-SecureKey-2026-XyZ"; 
 
     async function callAPI(action, params = {}) {
@@ -1060,7 +1060,8 @@
         lat: document.getElementById('editLat').value,
         lng: document.getElementById('editLng').value,
         note: document.getElementById('editNote').value, 
-        updateTime: timestamp 
+        updateTime: timestamp,
+        userId: currentUser ? currentUser.userId : ''
       };
 
       var res = await callAPI("updateHouseData", data);
@@ -1082,7 +1083,7 @@
 
     async function deleteHouse(hcode, houseNo) {
       if(confirm('⚠️ คำเตือนระดับสูง: คุณต้องการลบข้อมูลบ้านเลขที่ "' + houseNo + '" ใช่หรือไม่?\n\n(หากกดยืนยัน ข้อมูลจะถูกลบออกจากฐานข้อมูลทันทีและไม่สามารถกู้คืนได้!)')) {
-        var res = await callAPI("deleteHouseData", { hcode: hcode });
+        var res = await callAPI("deleteHouseData", { hcode: hcode, userId: currentUser ? currentUser.userId : '' });
         alert(res.message || "ดำเนินการเรียบร้อย");
         if(res && res.success) {
           await loadHouseData();
@@ -1180,15 +1181,37 @@
   }
 
   btn.disabled = true;
+  btn.innerHTML = "กำลังตรวจสอบข้อมูลซ้ำ...";
+
+  // 🌟 ตรวจสอบก่อนว่ามีหลังคาเรือนนี้อยู่แล้วหรือไม่ (กันข้อมูลซ้ำตามที่ร้องขอ)
+  var dupRes = await callAPI("checkHouseDuplicate", {
+    moo: moo, comm: comm, houseNo: houseNo, houseId11: houseId11
+  });
+
+  if (!dupRes || !dupRes.success) {
+    alert((dupRes && dupRes.message) ? dupRes.message : "ไม่สามารถตรวจสอบข้อมูลซ้ำได้ กรุณาลองใหม่อีกครั้ง");
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-save"></i> บันทึกข้อมูล';
+    return;
+  }
+
+  if (dupRes.exists) {
+    alert(dupRes.message || "⚠️ พบข้อมูลหลังคาเรือนนี้อยู่ในระบบแล้ว ไม่สามารถเพิ่มซ้ำได้");
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-save"></i> บันทึกข้อมูล';
+    return;
+  }
+
   btn.innerHTML = "กำลังบันทึก...";
 
-  // 🌟 เพิ่ม houseId11 เข้าไปใน payload (ข้อมูลที่ส่งไป API)
+  // 🌟 เพิ่ม houseId11 และ userId (สำหรับตรวจสอบสิทธิ์ฝั่งเซิร์ฟเวอร์) เข้าไปใน payload
   var res = await callAPI("addNewHouse", { 
     houseNo: houseNo, 
     moo: moo, 
     comm: comm, 
     asm: asm, 
-    houseId11: houseId11 
+    houseId11: houseId11,
+    userId: currentUser ? currentUser.userId : ''
   });
 
   if(res && res.success) {
@@ -1373,7 +1396,7 @@
           '<td>' + commSafe + '</td>' +
           '<td><span class="badge ' + badgeType + '">' + r[3] + '</span></td>' +
           '<td class="text-center">' +
-            '<button class="btn btn-sm btn-outline-warning" onclick="editUser(\'' + r[0] + '\',\'' + r[1] + '\',\'' + r[2] + '\',\'' + r[3] + '\',\'' + r[4] + '\',\'' + r[5] + '\',\'' + r[6] + '\')"><i class="bi bi-pencil"></i></button>' +
+            '<button class="btn btn-sm btn-outline-warning" onclick="editUser(\'' + r[0] + '\',\'' + r[1] + '\',\'' + r[3] + '\',\'' + r[4] + '\',\'' + r[5] + '\',\'' + r[6] + '\')"><i class="bi bi-pencil"></i></button>' +
             '<button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteUser(\'' + r[0] + '\', \'' + r[5] + '\')"><i class="bi bi-trash"></i></button>' +
           '</td>' +
         '</tr>';
@@ -1403,18 +1426,21 @@
       updateUserModalCommunity(); 
       document.getElementById('usernameInput').value = '';
       document.getElementById('passwordInput').value = '';
+      document.getElementById('passwordInput').placeholder = 'กำหนดรหัสผ่าน';
       document.getElementById('typeInput').value = 'user';
       document.getElementById('userModalTitle').innerHTML = '<i class="bi bi-person-plus-fill"></i> เพิ่มผู้ใช้งานใหม่';
       userModal.show();
     }
 
-    function editUser(id, user, pass, type, comm, name, moo) {
+    function editUser(id, user, type, comm, name, moo) {
       document.getElementById('userIdInput').value = id;
       document.getElementById('fullnameInput').value = name;
       document.getElementById('mooInput').value = moo;
       updateUserModalCommunity(comm); 
       document.getElementById('usernameInput').value = user;
-      document.getElementById('passwordInput').value = pass;
+      // PDPA: ไม่ดึงรหัสผ่านเดิมมาแสดง/เติมให้ในฟอร์ม เว้นว่างไว้ = ไม่เปลี่ยนรหัสผ่าน
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('passwordInput').placeholder = 'เว้นว่างไว้หากไม่ต้องการเปลี่ยนรหัสผ่าน';
       document.getElementById('typeInput').value = type;
       document.getElementById('userModalTitle').innerHTML = '<i class="bi bi-pencil-square"></i> แก้ไขผู้ใช้งาน';
       userModal.show();
@@ -1422,18 +1448,23 @@
 
     async function processSaveUser() {
       var btn = event.target;
+      var isEditing = !!document.getElementById('userIdInput').value;
       var data = {
         id: document.getElementById('userIdInput').value,
         fullname: document.getElementById('fullnameInput').value,
         moo: document.getElementById('mooInput').value,
         comm: document.getElementById('userInputCommunity').value,
         user: document.getElementById('usernameInput').value,
-        pass: document.getElementById('passwordInput').value,
-        type: document.getElementById('typeInput').value
+        pass: document.getElementById('passwordInput').value, // เว้นว่างได้เมื่อแก้ไข = ไม่เปลี่ยนรหัสผ่าน
+        type: document.getElementById('typeInput').value,
+        userId: currentUser ? currentUser.userId : ''
       };
       
-      if(!data.fullname || !data.user || !data.pass) {
-        alert("กรุณากรอก ชื่อ-นามสกุล, Username และ Password ให้ครบถ้วน!"); return;
+      if(!data.fullname || !data.user) {
+        alert("กรุณากรอก ชื่อ-นามสกุล และ Username ให้ครบถ้วน!"); return;
+      }
+      if(!isEditing && !data.pass) {
+        alert("กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่!"); return;
       }
       
       btn.disabled = true; btn.innerText = "กำลังบันทึก...";
@@ -1446,7 +1477,7 @@
 
     async function deleteUser(id, name) {
       if(confirm('คุณต้องการลบผู้ใช้ : "' + name + '" ใช่หรือไม่?\n(คำเตือน: ข้อมูลจะไม่สามารถกู้คืนได้)')) {
-        var res = await callAPI("deleteUserData", { id: id });
+        var res = await callAPI("deleteUserData", { id: id, userId: currentUser ? currentUser.userId : '' });
         alert((res && (res.message || res)) || "ลบเรียบร้อย");
         await loadUsers(); 
       }
@@ -1520,7 +1551,7 @@
       btn.disabled = true;
       btn.innerHTML = "กำลังบันทึก...";
       
-      var res = await callAPI("saveSystemSettings", { logoUrl: url });
+      var res = await callAPI("saveSystemSettings", { logoUrl: url, userId: currentUser ? currentUser.userId : '' });
       alert(res.message || "บันทึกเรียบร้อย");
       await loadSystemLogo(); 
       btn.disabled = false;
