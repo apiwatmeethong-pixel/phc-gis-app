@@ -212,13 +212,13 @@
       table {
         width: 100% !important;
         border-collapse: collapse !important;
-        table-layout: fixed !important; /* บังคับฟิกซ์ความกว้างไม่ให้ล้นเล็ดลอด */
+        table-layout: fixed !important;
       }
       th, td {
         border: 1px solid #111111 !important;
         padding: 5px !important;
         font-size: 10pt !important;
-        word-break: break-word !important; /* สั่งตัดคำรหัสประจำบ้านและรายการบ้านเลขที่ยาวๆ */
+        word-break: break-word !important;
         white-space: normal !important;
       }
       th { background-color: #eaeaea !important; color: black !important; }
@@ -260,7 +260,7 @@
     </div>
   </div>
 
-  <!-- 📦 ส่วนประกอบระบบแอปพลิเคชันหลัก (ซ่อนไว้เริ่มต้น จะแสดงเมื่อล็อกอินสำเร็จ) -->
+  <!-- 📦 ส่วนประกอบระบบแอปพลิเคชันหลัก -->
   <div id="appWrapper" style="display: none;">
     
     <!-- 🖥️ แถบเมนูด้านซ้ายมือ (Sidebar) สำหรับ PC -->
@@ -437,7 +437,7 @@
           </div>
         </div>
 
-        <!-- [6. 🌟 หน้าจอรายงาน อสม. แนวนอนตามพล็อตไฟล์แนบพร้อมเชื่อมคำนวณหลังคาเรือน] -->
+        <!-- [6. หน้าจอรายงาน อสม. แนวนอนตามพล็อตไฟล์แนบพร้อมเชื่อมคำนวณหลังคาเรือน] -->
         <div id="osmDashboard" class="page-section">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h3 class="fw-bold text-dark mb-0"><i class="bi bi-people-fill"></i> 6. ทะเบียนสรุปประวัติและเขตรับผิดชอบ อสม. ชุมชน</h3>
@@ -588,7 +588,6 @@
       "8": ["ชุมชนหัวทุ่งสามัคคี"]
     };
 
-    // 🌟 ฟังก์ชันสลับการย่อขยาย Sidebar (PC Mode)
     function toggleSidebar() {
       const sidebar = document.getElementById('mainSidebar');
       const content = document.getElementById('mainContentWrapper');
@@ -647,7 +646,6 @@
           document.getElementById('adminLogMenu').style.display = 'flex';
         }
         
-        // 🌟 ปลดล็อกซ่อน/แสดง โครงสร้างหน้าต่างหลักเมื่อล็อกอินผ่านฉลุยเท่านั้น
         document.getElementById('loginSection').style.display = 'none';
         document.getElementById('appWrapper').style.display = 'block';
         
@@ -784,7 +782,6 @@
       }
     }
 
-    // 🌟 [ระบบผูกสูตรคำนวณสรุปข้อมูล อสม. แนวนอนเชื่อมข้ามฐานข้อมูลบ้านรายบุคคล]
     async function loadOsmDashboardData() {
       var tbody = document.getElementById('osmDashTableBody');
       tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border text-success spinner-border-sm"></div> กำลังเชื่อมพิกัดประมวลผลความรับผิดชอบ...</td></tr>';
@@ -806,7 +803,6 @@
       var tbody = document.getElementById('osmDashTableBody'); tbody.innerHTML = '';
       var idx = { name: headersData.indexOf("ชื่อ"), idCard: headersData.indexOf("ID"), moo: headersData.indexOf("หมู่-หมู่บ้าน"), phone: headersData.indexOf("หมายเลขโทรศัพท์"), addr: headersData.indexOf("ที่อยู่"), img: headersData.indexOf("ลิงก์รูปภาพ"), email: headersData.indexOf("Email"), line: headersData.indexOf("Line ID"), comm: headersData.indexOf("community"), hn: headersData.indexOf("HN") };
       
-      // ดึงคอลัมน์จากชีทบ้านหลัก
       var houseAsmCol = headers.indexOf('อสม');
       var houseNoCol = headers.indexOf('บ้านเลขที่');
 
@@ -815,7 +811,6 @@
         var osmName = (r[idx.name] || '').toString().trim();
         var img = r[idx.img] || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
         
-        // 🌟 ประมวลหาหลังคาเรือนที่ดูแลร่วมกับชีทหลังคาเรือนหลักแบบไดนามิก[cite: 2]
         var houseList = [];
         if (globalHouseData.length > 1 && houseAsmCol > -1) {
           globalHouseData.slice(1).forEach(hRow => {
@@ -853,6 +848,9 @@
       renderOsmDashboardTable(filtered, ["ลำดับ","ชื่อ","ID","หมู่-หมู่บ้าน","หมายเลขโทรศัพท์","ที่อยู่","ลิงก์รูปภาพ","Email","Line ID","community","HN"]);
     }
 
+    /* ====================================================================
+       🌟 แก้ไขจุดบั๊ก: จัดรูปประโยควงเล็บปีกกาและเครื่องหมายคอมมาภายใน setTimeout ให้เสร็จสมบูรณ์
+       ==================================================================== */
     function showPage(pageId) {
       document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active-section'));
       var target = document.getElementById(pageId); if(target) target.classList.add('active-section');
@@ -860,11 +858,30 @@
       document.querySelectorAll('.sidebar-menu .nav-link, .bottom-nav .nav-link').forEach(n => n.classList.remove('active'));
       document.querySelectorAll(`[onclick="showPage('${pageId}')"]`).forEach(m => m.classList.add('active'));
       
-      if(pageId === 'dashboard') { setTimeout(() => { if(!map){ map=L.map('map').setView([18.17, 99.39],13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); markersGroup=L.layerGroup().addTo(map); } map.invalidateSize(); loadMapMarkers(); drawDashboard([headers].concat(filteredDataGlobal)); }, 300); }
-      if(pageId === 'searchHouse') { setTimeout(() => { if(!searchMap) { searchMap = L.map('searchMapArea').setView([18.17, 99.39], 13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(searchMap); } searchMap.invalidateSize(); }, 300); }
-      if(pageId === 'osmProfile') { setTimeout(() => loadOsmProfileData(), 200); }
-      if(pageId === 'osmDashboard') { setTimeout(() => loadOsmDashboardData(), 200); }
-      if(pageId === 'manageLog') { setTimeout(() => loadAuditLog(), 200); }
+      if(pageId === 'dashboard') { 
+        setTimeout(() => { 
+          if(!map){ 
+            map=L.map('map').setView([18.17, 99.39],13); 
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); 
+            markersGroup=L.layerGroup().addTo(map); 
+          } 
+          map.invalidateSize(); 
+          loadMapMarkers(); 
+          drawDashboard([headers].concat(filteredDataGlobal)); 
+        }, 300); 
+      }
+      if(pageId === 'searchHouse') { 
+        setTimeout(() => { 
+          if(!searchMap) { 
+            searchMap = L.map('searchMapArea').setView([18.17, 99.39], 13); 
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(searchMap); 
+          } 
+          searchMap.invalidateSize(); 
+        }, 300); 
+      }
+      if(pageId === 'osmProfile') { setTimeout(() => { loadOsmProfileData(); }, 200); }
+      if(pageId === 'osmDashboard') { setTimeout(() => { loadOsmDashboardData(); }, 200); }
+      if(pageId === 'manageLog') { setTimeout(() => { loadAuditLog(); }, 200); }
     }
 
     async function loadOsmProfileData() {
