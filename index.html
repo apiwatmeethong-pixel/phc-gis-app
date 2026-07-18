@@ -506,7 +506,7 @@
             <button class="btn btn-dark shadow no-print" onclick="window.print()"><i class="bi bi-printer-fill me-2"></i>พิมพ์รายงาน อสม. (แนวนอน)</button>
           </div>
           <div class="card shadow-sm">
-            <div class="card-header pt-3 px-3 bg-dark no-print">
+            <div class="card-header pt-3 px-3 bg-dark no-print" id="dashFilterHeader">
               <div class="row align-items-center">
                 <div class="col-md-7"><h6 class="mb-0 text-white fw-bold">กรองรายชื่อ อสม. แยกตามพื้นที่สังกัดชุมชนเพื่อสั่งพิมพ์ออกกระดาษ A4 แนวนอน</h6></div>
                 <div class="col-md-5"><select class="form-select form-select-sm border-light" id="dashCommunityFilter" onchange="filterOsmDashboard()"></select></div>
@@ -631,7 +631,7 @@
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwuOX9ypCeS-DsvFfqSPIcSiySB_JHAroHRLm8hhUSER2p0K5vIMlRyu2rNtNVihHezNg/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbz6f6KKyA94Ack9mBiSw0hPSbE8T_TFWcm-r_5bneWAa-gOXB1TAAGNZnsEd33nFcU5vg/exec";
     const API_KEY = "Tph-Osm-Gis-SecureKey-2026-XyZ"; 
 
     var globalHouseData=[], filteredDataGlobal=[], headers=[], currentPage=1, rowsPerPage=50;
@@ -749,7 +749,10 @@
       if (!data || data.length < 2) return;
       globalHouseData = data; headers = data[0];
       var allRows = data.slice(1);
-      filteredDataGlobal = (currentUser && currentUser.type === 'admin') ? allRows : allRows.filter(row => row[headers.indexOf('หมู่ที่')] == currentUser.moo);
+      var colMooIdx = headers.indexOf('หมู่ที่'), colCommIdx = headers.indexOf('ชุมชนบ้าน');
+      filteredDataGlobal = (currentUser && currentUser.type === 'admin') 
+        ? allRows 
+        : allRows.filter(row => row[colMooIdx] == currentUser.moo && (row[colCommIdx]||'').toString().trim() === (currentUser.community||'').toString().trim());
       
       var searchInput = document.getElementById('searchInput');
       var searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
@@ -791,8 +794,16 @@
       document.getElementById('displayHouseId11').innerText = "รหัสประจำบ้าน 11 หลัก: " + (houseId11 || '-');
       document.getElementById('editMoo').value = moo;
       
-      var dropdown = document.getElementById('editCommunity'); dropdown.innerHTML = '<option value="">-- เลือกชุมชน --</option>';
-      (communityMap[moo] || []).forEach(c => { dropdown.innerHTML += `<option value="${c}" ${c===comm?'selected':''}>${c}</option>`; });
+      var dropdown = document.getElementById('editCommunity');
+      if (currentUser.type !== 'admin') {
+        // 🌟 ผู้ใช้ทั่วไปแก้ไขได้เฉพาะภายในชุมชนของตนเองเท่านั้น ไม่สามารถย้ายบ้านออกนอกชุมชนได้
+        dropdown.innerHTML = `<option value="${currentUser.community}" selected>${currentUser.community}</option>`;
+        dropdown.disabled = true;
+      } else {
+        dropdown.disabled = false;
+        dropdown.innerHTML = '<option value="">-- เลือกชุมชน --</option>';
+        (communityMap[moo] || []).forEach(c => { dropdown.innerHTML += `<option value="${c}" ${c===comm?'selected':''}>${c}</option>`; });
+      }
       
       updateAsmDropdown('editAsm', moo, comm, asm);
       document.getElementById('editStatus').value = status === 'ยืนยันข้อมูล' ? 'ยืนยันข้อมูล' : 'ยังไม่ยืนยัน';
@@ -826,8 +837,18 @@
     }
 
     function updateAddHouseCommunity() {
-      var comm = document.getElementById('addHouseComm'); comm.innerHTML = '<option value="">-เลือกชุมชน-</option>';
-      (communityMap[document.getElementById('addHouseMoo').value] || []).forEach(c => { comm.innerHTML += `<option value="${c}">${c}</option>`; });
+      var comm = document.getElementById('addHouseComm');
+      var moo = document.getElementById('addHouseMoo').value;
+      if (currentUser.type !== 'admin') {
+        // 🌟 ผู้ใช้ทั่วไปเพิ่มบ้านได้เฉพาะในชุมชนของตนเองเท่านั้น
+        comm.innerHTML = `<option value="${currentUser.community}">${currentUser.community}</option>`;
+        comm.disabled = true;
+        updateAsmDropdown('addHouseAsm', moo, currentUser.community, "");
+        return;
+      }
+      comm.disabled = false;
+      comm.innerHTML = '<option value="">-เลือกชุมชน-</option>';
+      (communityMap[moo] || []).forEach(c => { comm.innerHTML += `<option value="${c}">${c}</option>`; });
     }
 
     async function processAddHouse() {
@@ -959,6 +980,12 @@
         }, 300); 
       }
       if(pageId === 'searchHouse') { 
+        if (currentUser.type !== 'admin') {
+          var sm = document.getElementById('searchMoo');
+          sm.innerHTML = `<option value="${currentUser.moo}">${currentUser.moo}</option>`;
+          sm.disabled = true;
+          updateSearchCommunity();
+        }
         setTimeout(() => { 
           if(!searchMap) { 
             searchMap = L.map('searchMapArea').setView([18.17, 99.39], 13); 
@@ -967,8 +994,23 @@
           searchMap.invalidateSize(); 
         }, 300); 
       }
+      if(pageId === 'reportArea') {
+        if (currentUser.type !== 'admin') {
+          var rm = document.getElementById('reportMoo');
+          rm.innerHTML = `<option value="${currentUser.moo}">${currentUser.moo}</option>`;
+          rm.disabled = true;
+          var rc = document.getElementById('reportComm');
+          rc.innerHTML = `<option value="${currentUser.community}">${currentUser.community}</option>`;
+          rc.disabled = true;
+          generateReport();
+        }
+      }
       if(pageId === 'osmProfile') { setTimeout(() => { loadOsmProfileData(); }, 200); }
-      if(pageId === 'osmDashboard') { setTimeout(() => { loadOsmDashboardData(); }, 200); }
+      if(pageId === 'osmDashboard') { 
+        var dashHeader = document.getElementById('dashFilterHeader');
+        if (dashHeader) dashHeader.style.display = (currentUser.type === 'admin') ? '' : 'none';
+        setTimeout(() => { loadOsmDashboardData(); }, 200); 
+      }
       if(pageId === 'manageLog') { setTimeout(() => { loadAuditLog(); }, 200); }
     }
 
@@ -1077,7 +1119,15 @@
     }
 
     function updateSearchCommunity() {
-      var comm = document.getElementById('searchComm'); comm.innerHTML = '<option value="">-- เลือกชุมชน --</option>';
+      var comm = document.getElementById('searchComm');
+      if (currentUser.type !== 'admin') {
+        comm.innerHTML = `<option value="${currentUser.community}">${currentUser.community}</option>`;
+        comm.disabled = true;
+        updateSearchHouse();
+        return;
+      }
+      comm.disabled = false;
+      comm.innerHTML = '<option value="">-- เลือกชุมชน --</option>';
       (communityMap[document.getElementById('searchMoo').value] || []).forEach(c => { comm.innerHTML += `<option value="${c}">${c}</option>`; });
     }
     function updateSearchHouse() {
