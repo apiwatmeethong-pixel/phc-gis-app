@@ -252,7 +252,7 @@
         </button>
       </div>
     </div>
-  </div>
+  </div> 
 
   <!-- Main Content Section -->
   <div id="mainContent">
@@ -276,8 +276,13 @@
             <li class="nav-item"><a class="nav-link" id="btn-manageData" href="#" onclick="showPage('manageData')">2. จัดการข้อมูลบ้าน</a></li>
             <li class="nav-item"><a class="nav-link" id="btn-searchHouse" href="#" onclick="showPage('searchHouse')">3. ค้นหาพิกัดบ้าน</a></li>
             <li class="nav-item"><a class="nav-link" id="btn-reportArea" href="#" onclick="showPage('reportArea')">4. พิมพ์รายงาน</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('osmProfile')"><i class="bi bi-person-badge-fill me-1"></i>ประวัติ อสม.</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('osmDashboard')"><i class="bi bi-people-fill me-1"></i>สรุปข้อมูล อสม.</a></li>
             <li id="adminMenu" class="nav-item" style="display:none;">
               <a class="nav-link" id="btn-manageUser" href="#" onclick="showPage('manageUser')">5. ตั้งค่า Admin</a>
+            </li>
+            <li id="adminLogMenu" class="nav-item" style="display:none;">
+              <a class="nav-link" id="btn-manageLog" href="#" onclick="showPage('manageLog')">6. จัดการ Log</a>
             </li>
             <li class="nav-item ms-2">
               <button class="btn btn-outline-light btn-sm mt-1" onclick="logout()">
@@ -295,11 +300,11 @@
       <a href="#" class="nav-link" id="bot-searchHouse" onclick="showPage('searchHouse')"><i class="bi bi-search"></i> ค้นหาพิกัด</a>
       <a href="#" class="nav-link" id="bot-reportArea" onclick="showPage('reportArea')"><i class="bi bi-printer"></i> รายงาน</a>
       <a href="#" class="nav-link" id="bot-manageUser" onclick="showPage('manageUser')" style="display:none;"><i class="bi bi-people"></i> Admin</a>
+      <a href="#" class="nav-link" id="bot-manageLog" onclick="showPage('manageLog')" style="display:none;"><i class="bi bi-journal-text"></i> Log</a>
     </div>
 
     <div class="container mt-4 mb-5">
       
-      <!-- Dashboard Page -->
       <div id="dashboard" class="page-section active-section">
         <h3 class="mb-3"><i class="bi bi-pie-chart-fill text-success"></i> 1. Dashboard & ภาพรวมชุมชน</h3>
         <div class="row">
@@ -347,7 +352,6 @@
         </div>
       </div>
 
-      <!-- Manage Data Page -->
       <div id="manageData" class="page-section">
         <h3 class="mb-3"><i class="bi bi-house-door text-success"></i> 2. จัดการข้อมูลบ้าน</h3>
         <div class="card shadow-sm mb-3">
@@ -366,6 +370,7 @@
                 <thead class="table-success text-nowrap">
                   <tr>
                     <th>บ้านเลขที่</th>
+                    <th>รหัสประจำบ้าน 11 หลัก</th>
                     <th>ชุมชน</th>
                     <th>อสม.ที่ดูแล</th>
                     <th>สถานะ</th>
@@ -373,7 +378,7 @@
                   </tr>
                 </thead>
                 <tbody id="tableBody">
-                  <tr><td colspan="5" class="text-center text-muted">กำลังโหลดข้อมูล...</td></tr>
+                  <tr><td colspan="6" class="text-center text-muted">กำลังโหลดข้อมูล...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -391,7 +396,6 @@
         </div>
       </div>
 
-      <!-- Search House Page -->
       <div id="searchHouse" class="page-section">
         <h3 class="mb-3"><i class="bi bi-search text-info"></i> ค้นหาพิกัดบ้าน</h3>
         <div class="card shadow-sm border-info mb-3">
@@ -429,7 +433,6 @@
         </div>
       </div>
 
-      <!-- Report Area Page -->
       <div id="reportArea" class="page-section">
         <div class="d-flex justify-content-between align-items-center mb-3 no-print">
           <h3><i class="bi bi-printer-fill text-secondary"></i> พิมพ์รายงานความรับผิดชอบ</h3>
@@ -473,14 +476,15 @@
             <table class="table table-bordered align-middle">
               <thead class="table-light text-center">
                 <tr>
-                  <th style="width: 10%;">ลำดับ</th>
-                  <th style="width: 25%;">บ้านเลขที่</th>
-                  <th style="width: 45%;">อสม. ผู้รับผิดชอบ</th>
-                  <th style="width: 20%;">สถานะ</th>
+                  <th style="width: 8%;">ลำดับ</th>
+                  <th style="width: 18%;">บ้านเลขที่</th>
+                  <th style="width: 22%;">รหัสประจำบ้าน 11 หลัก</th>
+                  <th style="width: 37%;">อสม. ผู้รับผิดชอบ</th>
+                  <th style="width: 15%;">สถานะ</th>
                 </tr>
               </thead>
               <tbody id="reportTableBody">
-                <tr><td colspan="4" class="text-center py-4">รอการเลือกข้อมูล...</td></tr>
+                <tr><td colspan="5" class="text-center py-4">รอการเลือกข้อมูล...</td></tr>
               </tbody>
             </table>
           </div>
@@ -492,10 +496,9 @@
         </div>
       </div>
 
-      <!-- Manage User (Admin) Page -->
       <div id="manageUser" class="page-section">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h3><i class="bi bi-people-fill text-warning"></i> 3. จัดการผู้ใช้งาน (Admin)</h3>
+          <h3><i class="bi bi-people-fill text-warning"></i> 5. จัดการผู้ใช้งาน (Admin)</h3>
           <button class="btn btn-primary" onclick="openUserModal()"><i class="bi bi-person-plus"></i> เพิ่ม User ใหม่</button>
         </div>
         <div class="card shadow-sm mb-4 border-primary">
@@ -534,12 +537,202 @@
         </div>
       </div>
 
+      </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div> <div id="manageLog" class="page-section">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
+          <h3><i class="bi bi-journal-text text-danger"></i> 6. จัดการระบบ Log (PDPA Audit Trail)</h3>
+          <div class="d-flex gap-2 w-100 w-md-auto">
+            <button class="btn btn-primary shadow-sm flex-fill flex-md-none" onclick="downloadLogCSV()">
+              <i class="bi bi-download"></i> สำรองข้อมูล (CSV)
+            </button>
+            <button class="btn btn-danger shadow-sm flex-fill flex-md-none" onclick="clearLogSheet()">
+              <i class="bi bi-trash3"></i> ล้างข้อมูลค้างชีท
+            </button>
+          </div>
+        </div>
+
+<!-- ==================================================================== -->
+<!-- 🌟 [หน้าควบคุมที่เพิ่มใหม่]: หน้าประวัติ อสม. พลัส อัปเดตรูปโปรไฟล์ -->
+<!-- ==================================================================== -->
+<div id="osmProfile" class="page-section container mt-4" style="display:none;">
+  <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+    <div class="card-header bg-white border-0 pt-4 px-4 d-flex align-items-center">
+      <div class="p-2 bg-light-danger rounded-3 text-danger me-3" style="background-color: #FFF0F5;">
+        <i class="bi bi-person-badge fs-3"></i>
+      </div>
+      <div>
+        <h4 class="fw-bold mb-0 text-dark">ประวัติ อสม.พลัส</h4>
+        <small class="text-muted">ตรวจสอบข้อมูลส่วนตัวและจัดการลิงก์ภาพโปรไฟล์ผู้ดูแลระบบ</small>
+      </div>
+    </div>
+    <div class="card-body p-4">
+      <div class="row">
+        <!-- ฝั่งซ้าย: แสดงรูปโปรไฟล์อัปโหลดลิงก์ -->
+        <div class="col-md-4 text-center border-end border-light pb-4">
+          <div class="position-relative d-inline-block mb-3">
+            <img id="profilePreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Avatar" class="img-thumbnail rounded-circle shadow-sm" style="width: 160px; height: 160px; object-fit: cover; border: 4px solid #F0F8FF;">
+          </div>
+          <h5 class="fw-bold mb-1" id="profileNameDisplay">-</h5>
+          <span class="badge bg-soft-primary px-3 py-2 text-primary" id="profileCommDisplay" style="background-color: #E6F2FF;">-</span>
+          
+          <div class="mt-4 text-start bg-light p-3 rounded-3 small">
+            <div class="mb-2"><b>เลขประจำตัว (ID):</b> <span id="profileIdCardDisplay">-</span></div>
+            <div><b>รหัสทะเบียนผู้ป่วย (HN):</b> <span id="profileHnDisplay">-</span></div>
+          </div>
+        </div>
+        
+        <!-- ฝั่งขวา: แบบฟอร์มแก้ไขข้อมูลส่วนตัวครบครัน -->
+        <div class="col-md-8 ps-md-4">
+          <h5 class="fw-bold text-secondary mb-3"><i class="bi bi-pencil-square me-2"></i>แก้ไขรายละเอียดข้อมูลส่วนตัว</h5>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-muted small">หมายเลขโทรศัพท์ติดต่อ</label>
+              <input type="text" class="form-control px-3" id="profilePhone" style="border-radius: 10px;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold text-muted small">Line ID</label>
+              <input type="text" class="form-control px-3" id="profileLineId" style="border-radius: 10px;">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-bold text-muted small">ที่อยู่อีเมล (Email)</label>
+              <input type="email" class="form-control px-3" id="profileEmail" style="border-radius: 10px;">
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-bold text-muted small">ที่อยู่ปัจจุบันตามทะเบียน อสม.</label>
+              <textarea class="form-control px-3" id="profileAddress" rows="2" style="border-radius: 10px;"></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-bold text-muted small">ลิงก์ URL รูปภาพประจำตัวผู้ใช้</label>
+              <input type="text" class="form-control px-3 font-monospace small" id="profileImgUrl" placeholder="https://..." oninput="document.getElementById('profilePreview').src=this.value" style="border-radius: 10px;">
+              <div class="form-text small text-muted">คำแนะนำ: คัดลอกลิงก์รูปภาพจาก Google Drive หรือเว็บฝากรูปที่ปลอดภัยมาใช้อัปโหลดภาพ</div>
+            </div>
+            <div class="col-12 text-end pt-3">
+              <button class="btn btn-success px-4 py-2fw-bold" id="btnSaveProfile" onclick="saveOsmProfile()" style="border-radius: 10px;">
+                <i class="bi bi-save me-2"></i>บันทึกการปรับปรุงข้อมูลส่วนตัว
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 
-  <!-- Modals -->
-  <!-- Edit House Modal -->
-  <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+<!-- ==================================================================== -->
+<!-- 🌟 [หน้าควบคุมที่เพิ่มใหม่]: หน้าสรุปภาพรวมข้อมูล อสม. คัดกรองรายชุมชน -->
+<!-- ==================================================================== -->
+<div id="osmDashboard" class="page-section container mt-4" style="display:none;">
+  <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+    <div class="card-header bg-white border-0 pt-4 px-4">
+      <div class="row align-items-center">
+        <div class="col-md-6 d-flex align-items-center mb-3 mb-md-0">
+          <div class="p-2 bg-light-info rounded-3 text-info me-3" style="background-color: #E0FFFF;">
+            <i class="bi bi-people fs-3"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0 text-dark">สรุปข้อมูลภาพรวม อสม.พลัส</h4>
+            <small class="text-muted">ระบบรายงานสถิติทะเบียนสมาชิก อสม. แยกพื้นที่รายชุมชน</small>
+          </div>
+        </div>
+        <!-- ตัวเลือกกรองข้อมูลรายชุมชนในหมู่ -->
+        <div class="col-md-6">
+          <div class="input-group" style="border-radius: 10px; overflow: hidden;">
+            <span class="input-group-text bg-light text-muted border-light fw-bold small"><i class="bi bi-filter me-2"></i>เลือกชุมชน</span>
+            <select class="form-select border-light bg-light font-medium" id="dashCommunityFilter" onchange="filterOsmDashboard()" style="cursor: pointer;">
+              <option value="">-- แสดงผลทุกชุมชนในระบบ --</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <!-- ส่วนแสดงตารางรายชื่อ อสม.พลัส -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size: 0.92rem;">
+          <thead class="bg-light text-secondary fw-bold text-center">
+            <tr>
+              <th style="width: 70px;">รูปถ่าย</th>
+              <th class="text-start">ชื่อ - นามสกุล</th>
+              <th>หมู่</th>
+              <th class="text-start">ชุมชนที่สังกัด</th>
+              <th>เบอร์โทรศัพท์</th>
+              <th>Line ID</th>
+              <th>เลขทะเบียน HN</th>
+            </tr>
+          </thead>
+          <tbody id="osmDashTableBody">
+            <tr>
+              <td colspan="7" class="text-center py-5 text-muted">
+                <div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังประมวลผลข้อมูลแดชบอร์ด อสม.พลัส...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer bg-white border-0 py-3 px-4 text-end text-muted small">
+        รวมจำนวนสมาชิก อสม. ในตัวกรองปัจจุบัน: <span class="fw-bold text-primary fs-6" id="dashOsmCount">0</span> คน
+      </div>
+    </div>
+  </div>
+</div>
+        
+        <div class="card shadow-sm mb-3">
+          <div class="card-body">
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <span class="input-group-text bg-white"><i class="bi bi-search text-danger"></i></span>
+                  <input type="text" id="logSearchInput" class="form-control" placeholder="ค้นหาตามชื่อผู้ใช้ / คำสั่ง / รายละเอียด..." onkeyup="filterLogTable()">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <select id="logTypeFilter" class="form-select" onchange="filterLogTable()">
+                  <option value="">-- ทุกประเภทกิจกรรม (Action Type) --</option>
+                  <option value="AUTH">AUTH (เข้า/ออกระบบ)</option>
+                  <option value="READ">READ (เข้าถึงข้อมูลส่วนบุคคล)</option>
+                  <option value="CREATE">CREATE (เพิ่มข้อมูลบ้าน/ผู้ใช้)</option>
+                  <option value="UPDATE">UPDATE (แก้ไขข้อมูล/พิกัด)</option>
+                  <option value="DELETE">DELETE (ลบข้อมูลออกจากชีท)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-hover table-bordered mb-0">
+                <thead class="table-dark text-nowrap">
+                  <tr>
+                    <th>วัน-เวลา</th>
+                    <th>ผู้ใช้งาน</th>
+                    <th>ประเภทกิจกรรม</th>
+                    <th>ชื่อฟังก์ชัน</th>
+                    <th>Target ID</th>
+                    <th>สถานะ</th>
+                    <th>รายละเอียดเชิงลึก</th>
+                  </tr>
+                </thead>
+                <tbody id="logTableBody">
+                  <tr><td colspan="7" class="text-center text-muted">กำลังโหลดข้อมูล Log...</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3 bg-light p-2 rounded">
+              <div class="text-muted small mb-2 mb-md-0 text-center">
+                แสดงหน้า <span id="logCurrentPageDisplay" class="fw-bold text-dark">1</span> 
+                จากทั้งหมด <span id="logTotalPageDisplay" class="fw-bold text-dark">1</span> หน้า
+              </div>
+              <div>
+                <button class="btn btn-outline-secondary btn-sm me-1" id="logPrevBtn" onclick="changeLogPage(-1)" disabled><i class="bi bi-chevron-left"></i> ก่อนหน้า</button>
+                <button class="btn btn-outline-secondary btn-sm" id="logNextBtn" onclick="changeLogPage(1)" disabled>ถัดไป <i class="bi bi-chevron-right"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> </div> </div> <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header bg-success text-white">
@@ -551,6 +744,10 @@
           <div class="mb-3 text-center">
             <span class="text-muted">บ้านเลขที่</span>
             <h4 id="displayHouseNo" class="text-primary fw-bold"></h4>
+          </div>
+          <div class="mb-3 text-center">
+            <span class="text-muted small">รหัสประจำบ้าน 11 หลัก</span>
+            <div id="displayHouseId11" class="fw-bold font-monospace text-secondary">-</div>
           </div>
           <hr>
           <div class="row">
@@ -604,7 +801,6 @@
     </div>
   </div>
 
-  <!-- Add House Modal -->
   <div class="modal fade" id="addHouseModal" tabindex="-1" aria-labelledby="addHouseModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -628,10 +824,10 @@
             <input type="text" id="addHouseNo" class="form-control" placeholder="เช่น 123/4">
           </div>
           <div class="mb-3">
-  <label class="form-label fw-bold text-primary">รหัสประจำบ้าน 11 หลัก <span class="text-danger">*</span></label>
-  <input type="text" id="addHouseId11" class="form-control border-primary" placeholder="ระบุตัวเลข 11 หลัก (ห้ามเว้นวรรค/ขีด)" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-  <div class="form-text">เฉพาะตัวเลขเท่านั้น จำเป็นต้องกรอกเพื่อบันทึกข้อมูล</div>
-</div>
+            <label class="form-label fw-bold text-primary">รหัสประจำบ้าน 11 หลัก <span class="text-danger">*</span></label>
+            <input type="text" id="addHouseId11" class="form-control border-primary" placeholder="ระบุตัวเลข 11 หลัก (ห้ามเว้นวรรค/ขีด)" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <div class="form-text">เฉพาะตัวเลขเท่านั้น จำเป็นต้องกรอกเพื่อบันทึกข้อมูล</div>
+          </div>
           <div class="mb-3">
             <label class="form-label fw-bold">อสม. ผู้รับผิดชอบ (ถ้ามี)</label>
             <select id="addHouseAsm" class="form-select">
@@ -649,7 +845,6 @@
     </div>
   </div>
 
-  <!-- User Modal (Admin) -->
   <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -709,7 +904,6 @@
       </div>
     </div>
   </div>
-
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -718,36 +912,45 @@
     // ==========================================
     // 0. API CONFIG / FETCH HELPER
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbzBCWPR8MXq79UMFIa05VBfRGJDeKTyXign4w-uC7LDoY4xrkAPij-Ku6UuVPr1JdcCXA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxasatuJyNH-_B2L4bR_WxqBX4y7yzKFIfKZmHUFyTdU20VkrfcOR0mBijpNNW1QDGk_w/exec";
     const API_KEY = "Tph-Osm-Gis-SecureKey-2026-XyZ"; 
 
     async function callAPI(action, params = {}) {
-      try {
-        const url = new URL(API_URL);
-        url.searchParams.set("action", action);
-        url.searchParams.set("apiKey", API_KEY);
+  try {
+    const url = new URL(API_URL);
+    url.searchParams.set("action", action);
+    url.searchParams.set("apiKey", API_KEY);
 
-        Object.keys(params).forEach(function(key) {
-          var value = params[key];
-          if (value === undefined || value === null) return;
-          if (typeof value === "object") {
-            url.searchParams.set(key, JSON.stringify(value));
-          } else {
-            url.searchParams.set(key, value);
-          }
-        });
-
-        const response = await fetch(url.toString(), {
-          method: "GET",
-          cache: "no-store"
-        });
-
-        return await response.json();
-      } catch (error) {
-        console.error("API Error:", error);
-        return { success: false, message: error.message || "API error" };
-      }
+    // 🌟 ส่วนที่เพิ่มขึ้นมาตามมาตรฐานความปลอดภัย PDPA:
+    // หากมีข้อมูลการล็อกอินของ User อยู่ในระบบ ให้แนบข้อมูลผู้ใช้ปัจจุบันส่งไปให้ Backend บันทึก Log เสมอ
+    if (currentUser) {
+      url.searchParams.set("currentUser", JSON.stringify({
+        user: currentUser.username || currentUser.user || document.getElementById('loginUser').value,
+        type: currentUser.type || "user"
+      }));
     }
+
+    Object.keys(params).forEach(function(key) {
+      var value = params[key];
+      if (value === undefined || value === null) return;
+      if (typeof value === "object") {
+        url.searchParams.set(key, JSON.stringify(value));
+      } else {
+        url.searchParams.set(key, value);
+      }
+    });
+
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    return { success: false, message: error.message || "API error" };
+  }
+}
 
     // ==========================================
     // 1. ตัวแปรหลักและการตั้งค่า (Global Variables)
@@ -758,7 +961,11 @@
     var currentPage = 1;
     var rowsPerPage = 50; 
     var globalOsmList = []; 
-
+    var globalLogData = [];
+    var filteredLogData = [];
+    var logCurrentPage = 1;
+    var logRowsPerPage = 30; // แสดงผลหน้าละ 30 กิจกรรมเพื่อไม่ให้เว็บบล๊อคค้าง
+    
     var currentUser = null; 
     var editModal = null;
     var userModal = null;
@@ -838,6 +1045,10 @@
           var adminMenuBot = document.getElementById('bot-manageUser');
           if(adminMenuPC) adminMenuPC.style.display = 'block';
           if(adminMenuBot) adminMenuBot.style.display = 'flex';
+          var adminLogPC = document.getElementById('adminLogMenu');
+          var adminLogBot = document.getElementById('bot-manageLog');
+          if(adminLogPC) adminLogPC.style.display = 'block';
+          if(adminLogBot) adminLogBot.style.display = 'flex';
         }
 
         document.getElementById('loginSection').style.display = 'none';
@@ -855,10 +1066,10 @@
       }
     }
 
-    async function loadHouseData() {
+    async function loadHouseData(preservePage) {
       var result = await callAPI("getHouseData");
       if (result && result.success) {
-        setupData(result.data);
+        setupData(result.data, preservePage);
       } else if (result) {
         console.error(result.message || "ไม่สามารถโหลดข้อมูลบ้านได้");
       }
@@ -889,6 +1100,10 @@
       if(adminMenuPC) adminMenuPC.style.display = 'none';
       if(adminMenuMobile) adminMenuMobile.style.display = 'none';
 
+      var adminLogPC = document.getElementById('adminLogMenu');
+    var adminLogMobile = document.getElementById('bot-manageLog');
+    if(adminLogPC) adminLogPC.style.display = 'none';
+    if(adminLogMobile) adminLogMobile.style.display = 'none';
       document.getElementById('mainContent').style.display = 'none';
       
       var bottomNav = document.getElementById('bottomNavMenu');
@@ -901,7 +1116,7 @@
     // ==========================================
     // 3. การจัดการข้อมูลและการแบ่งหน้า
     // ==========================================
-    function setupData(data) {
+    function setupData(data, preservePage) {
       try {
         if (!data || data.length < 2) return;
         globalHouseData = data; 
@@ -915,7 +1130,18 @@
           filteredDataGlobal = allRows.filter(function(row) { return row[colMooIndex] == currentUser.moo; });
         }
         
-        currentPage = 1;
+        // ถ้ามีการค้นหาค้างอยู่ ให้กรองผลลัพธ์ซ้ำตามคำค้นเดิมด้วย ไม่งั้นจะเห็นข้อมูลทั้งหมดหลังบันทึก
+        var searchInput = document.getElementById('searchInput');
+        var searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        if (searchTerm !== '') {
+          var colHouseNoIndex = headers.indexOf('บ้านเลขที่');
+          filteredDataGlobal = filteredDataGlobal.filter(function(row) {
+            var houseNo = row[colHouseNoIndex] ? row[colHouseNoIndex].toString().toLowerCase() : "";
+            return houseNo.indexOf(searchTerm) !== -1;
+          });
+        }
+        
+        if (!preservePage) currentPage = 1;
         updateTableAndPagination(); 
         
         google.charts.setOnLoadCallback(function() { 
@@ -994,6 +1220,7 @@
       var colLat = headers.indexOf('ละติจูด');
       var colLng = headers.indexOf('ลองจิจูด');
       var colNote = headers.indexOf('หมายเหตุ'); 
+      var colHouseId11 = headers.indexOf('รหัสประจำบ้าน 11 หลัก');
 
       dataSubset.forEach(function(row) {
         var status = (row[colStatus] || '').toString().trim();
@@ -1001,6 +1228,9 @@
         var safeComm = row[colComm].toString().replace(/'/g, "\\'");
         var safeAsm = row[colAsm].toString().replace(/'/g, "\\'");
         var safeNote = (colNote > -1 && row[colNote]) ? row[colNote].toString().replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
+        var houseId11 = (colHouseId11 > -1 && row[colHouseId11]) ? row[colHouseId11].toString().trim() : '';
+        var safeHouseId11 = houseId11.replace(/'/g, "\\'");
+        var houseId11Display = houseId11 ? '<span class="font-monospace">' + houseId11 + '</span>' : '<span class="text-muted">-</span>';
 
         var deleteBtn = '';
         if (currentUser && currentUser.type === 'admin') {
@@ -1011,11 +1241,12 @@
 
         var trHTML = '<tr>' +
           '<td>' + row[colHouseNo] + '</td>' +
+          '<td>' + houseId11Display + '</td>' +
           '<td>' + row[colComm] + '</td>' +
           '<td>' + row[colAsm] + '</td>' +
           '<td>' + badge + '</td>' +
           '<td>' +
-            '<button class="btn btn-sm btn-warning" onclick="openEditModal(\'' + row[colHcode] + '\',\'' + row[colHouseNo] + '\',\'' + safeComm + '\',\'' + safeAsm + '\',\'' + status + '\',\'' + row[colLat] + '\',\'' + row[colLng] + '\',\'' + row[colMoo] + '\',\'' + safeNote + '\')">' +
+            '<button class="btn btn-sm btn-warning" onclick="openEditModal(\'' + row[colHcode] + '\',\'' + row[colHouseNo] + '\',\'' + safeComm + '\',\'' + safeAsm + '\',\'' + status + '\',\'' + row[colLat] + '\',\'' + row[colLng] + '\',\'' + row[colMoo] + '\',\'' + safeNote + '\',\'' + safeHouseId11 + '\')">' +
               '<i class="bi bi-pencil-square"></i> แก้ไข' +
             '</button>' +
             deleteBtn +
@@ -1037,9 +1268,10 @@
       });
     }
 
-    function openEditModal(hcode, houseNo, comm, asm, status, lat, lng, moo, note) {
+    function openEditModal(hcode, houseNo, comm, asm, status, lat, lng, moo, note, houseId11) {
       document.getElementById('editHcode').value = hcode;
       document.getElementById('displayHouseNo').innerText = houseNo;
+      document.getElementById('displayHouseId11').innerText = (houseId11 && houseId11 !== 'undefined' && houseId11 !== '') ? houseId11 : '- ไม่มีข้อมูล -';
       document.getElementById('editMoo').value = (moo !== 'undefined' && moo !== '') ? moo : '-';
       
       updateCommunityDropdown(moo, comm);
@@ -1072,7 +1304,7 @@
       var res = await callAPI("updateHouseData", data);
       alert(res.message || res || "บันทึกเรียบร้อย");
       editModal.hide();
-      await loadHouseData();
+      await loadHouseData(true);
       btn.disabled = false; btn.innerText = "บันทึกข้อมูล";
     }
 
@@ -1091,7 +1323,7 @@
         var res = await callAPI("deleteHouseData", { hcode: hcode, userId: currentUser ? currentUser.userId : '' });
         alert(res.message || "ดำเนินการเรียบร้อย");
         if(res && res.success) {
-          await loadHouseData();
+          await loadHouseData(true);
         }
       }
     }
@@ -1331,7 +1563,8 @@
         hcode: headers.indexOf('hcode'),
         comm: headers.indexOf('ชุมชนบ้าน'),
         moo: headers.indexOf('หมู่ที่'),
-        status: headers.indexOf('สถานะการดูแล')
+        status: headers.indexOf('สถานะการดูแล'),
+        houseId11: headers.indexOf('รหัสประจำบ้าน 11 หลัก')
       };
 
       var bounds = [];
@@ -1348,18 +1581,20 @@
 
         var status = row[col.status] || 'ยังไม่ยืนยัน';
         var color = (status === 'ยืนยันข้อมูล') ? '#198754' : '#dc3545'; 
+        var houseId11 = row[col.houseId11] || '';
 
         var marker = L.circleMarker([lat, lng], {
           radius: 8, color: "#ffffff", weight: 1, fillColor: color, fillOpacity: 0.8
         });
 
         var popupHTML = '<b>บ้านเลขที่:</b> ' + row[col.house] + '<br>' +
+          '<b>รหัสประจำบ้าน 11 หลัก:</b> ' + (houseId11 || 'ไม่มีข้อมูล') + '<br>' +
           '<b>หมู่:</b> ' + row[col.moo] + '<br>' +
           '<b>ชุมชน:</b> ' + row[col.comm] + '<br>' +
           '<b>อสม:</b> ' + (row[col.asm] || 'ไม่มีข้อมูล') + '<br>' +
           '<b>สถานะ:</b> ' + status + '<br>' +
           '<button class="btn btn-sm btn-warning mt-2 w-100" ' +
-          'onclick="openEditModal(\'' + row[col.hcode] + '\',\'' + row[col.house] + '\',\'' + row[col.comm] + '\',\'' + row[col.asm] + '\',\'' + status + '\',\'' + lat + '\',\'' + lng + '\',\'' + row[col.moo] + '\')">' +
+          'onclick="openEditModal(\'' + row[col.hcode] + '\',\'' + row[col.house] + '\',\'' + row[col.comm] + '\',\'' + row[col.asm] + '\',\'' + status + '\',\'' + lat + '\',\'' + lng + '\',\'' + row[col.moo] + '\',\'\',\'' + houseId11 + '\')">' +
           '<i class="bi bi-pencil-square"></i> แก้ไขข้อมูล' +
           '</button>';
 
@@ -1528,6 +1763,22 @@
           if(searchMap) searchMap.invalidateSize();
         }, 350);
       }
+      if(pageId === 'manageLog') {
+      setTimeout(function() {
+        loadAuditLog();
+      }, 350);
+    }
+      // ค้นหาฟังก์ชัน showPage(pageId) ของเดิมแล้วเพิ่มเงื่อนไข IF สองชุดนี้ลงไปด้านในครับ
+    if (pageId === 'osmProfile') {
+      setTimeout(function() {
+        loadOsmProfileData();
+      }, 300);
+    }
+    if (pageId === 'osmDashboard') {
+      setTimeout(function() {
+        loadOsmDashboardData();
+      }, 300);
+    }
     }
     
     // ==========================================
@@ -1616,6 +1867,7 @@
       var colLng = headers.indexOf('ลองจิจูด');
       var colAsm = headers.indexOf('อสม');
       var colStatus = headers.indexOf('สถานะการดูแล');
+      var colHouseId11 = headers.indexOf('รหัสประจำบ้าน 11 หลัก');
 
       var houseData = globalHouseData.slice(1).find(function(r) { return r[colMoo] == moo && r[colComm] == comm && r[colHouse] == houseNo; });
 
@@ -1642,6 +1894,7 @@
 
         var status = houseData[colStatus] || 'ยังไม่ยืนยัน';
         var color = (status === 'ยืนยันข้อมูล') ? '#198754' : '#dc3545';
+        var houseId11 = (colHouseId11 > -1 && houseData[colHouseId11]) ? houseData[colHouseId11] : '';
 
         searchMarker = L.circleMarker([lat, lng], {
           radius: 12, color: "#fff", weight: 2, fillColor: color, fillOpacity: 0.9
@@ -1652,6 +1905,7 @@
           '<small class="text-muted">หมู่ ' + houseData[colMoo] + ' ชุมชน' + houseData[colComm] + '</small><br>' +
           '<hr class="my-2">' +
           '<div class="text-start">' +
+            '<b>รหัสประจำบ้าน 11 หลัก:</b> <span class="font-monospace">' + (houseId11 || 'ไม่มีข้อมูล') + '</span><br>' +
             '<b>อสม. ผู้ดูแล:</b> <span class="text-primary fw-bold">' + (houseData[colAsm] || 'ไม่มีข้อมูล') + '</span><br>' +
             '<b>สถานะ:</b> <span class="' + (status === 'ยืนยันข้อมูล' ? 'text-success' : 'text-danger') + '">' + status + '</span>' +
           '</div>' +
@@ -1722,7 +1976,7 @@
       var header = document.getElementById('reportHeader');
 
       if(!moo) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">กรุณาเลือกหมู่เพื่อแสดงข้อมูล</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">กรุณาเลือกหมู่เพื่อแสดงข้อมูล</td></tr>';
         header.innerText = 'กรุณาเลือกหมู่เพื่อแสดงรายงาน';
         reportFilteredData = [];
         updateReportPaginationUI();
@@ -1761,7 +2015,7 @@
       tbody.innerHTML = '';
       
       if(reportFilteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-danger py-4">ไม่พบข้อมูลบ้านที่ค้นหา</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">ไม่พบข้อมูลบ้านที่ค้นหา</td></tr>';
         updateReportPaginationUI();
         return;
       }
@@ -1773,16 +2027,19 @@
       var colHouse = headers.indexOf('บ้านเลขที่');
       var colAsm = headers.indexOf('อสม');
       var colStatus = headers.indexOf('สถานะการดูแล');
+      var colHouseId11 = headers.indexOf('รหัสประจำบ้าน 11 หลัก');
 
       var count = start + 1; 
       pageData.forEach(function(r) {
         var asmName = r[colAsm] || '-';
         var status = r[colStatus] || 'ยังไม่ยืนยัน';
         var statusIcon = status === 'ยืนยันข้อมูล' ? '✔️ ยืนยันแล้ว' : 'รอตรวจสอบ';
+        var houseId11 = (colHouseId11 > -1 && r[colHouseId11]) ? r[colHouseId11] : '-';
         
         var trHTML = '<tr>' +
           '<td class="text-center">' + count++ + '</td>' +
           '<td class="text-center fw-bold">' + r[colHouse] + '</td>' +
+          '<td class="text-center font-monospace">' + houseId11 + '</td>' +
           '<td>' + asmName + '</td>' +
           '<td class="text-center">' + statusIcon + '</td>' +
         '</tr>';
@@ -1813,7 +2070,299 @@
       reportCurrentPage += step;
       renderReportPage();
     }
+// ===================================================
+    // 🌟 6. ระบบควบคุมประวัติกิจกรรม (PDPA Audit Trail)
+    // ===================================================
 
+    // 🌟 โหลดข้อมูลประวัติจากฐานข้อมูลมาพักไว้ในหน้าเว็บ
+    async function loadAuditLog() {
+      var tbody = document.getElementById('logTableBody');
+      if(!tbody) return;
+      // เพิ่มสปินเนอร์หมุนสวยงามระหว่างรอโหลดข้อมูลขนาดใหญ่
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted"><div class="spinner-border spinner-border-sm text-danger me-2"></div>กำลังดึงข้อมูล Log ตามมาตรฐาน PDPA...</td></tr>';
+      
+      var result = await callAPI("getAuditLog");
+      if (result && result.success) {
+        if (result.data && result.data.length > 1) {
+          globalLogData = result.data.slice(1); // ตัดหัวตารางออก เอาเฉพาะเนื้อข้อมูลมาประมวลผล
+          globalLogData.reverse(); // นำเหตุการณ์ล่าสุดขึ้นแสดงก่อน
+          filteredLogData = [...globalLogData];
+          logCurrentPage = 1;
+          updateLogTableAndPagination();
+        } else {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">ยังไม่มีข้อมูล Log ถูกบันทึกไว้ในชีท</td></tr>';
+        }
+      } else {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">❌ ล้มเหลว: ' + (result.message || 'ไม่สามารถติดต่อ API ได้') + '</td></tr>';
+      }
+    }
+
+    // 🌟 คำนวณจัดการ Pagination
+    function updateLogTableAndPagination() {
+      var totalRows = filteredLogData.length;
+      var totalPages = Math.ceil(totalRows / logRowsPerPage) || 1;
+
+      if (logCurrentPage < 1) logCurrentPage = 1;
+      if (logCurrentPage > totalPages) logCurrentPage = totalPages;
+
+      var start = (logCurrentPage - 1) * logRowsPerPage;
+      var end = start + logRowsPerPage;
+      var pageData = filteredLogData.slice(start, end);
+      
+      renderLogTableHTML(pageData); 
+
+      document.getElementById('logCurrentPageDisplay').innerText = logCurrentPage;
+      document.getElementById('logTotalPageDisplay').innerText = totalPages;
+      document.getElementById('logPrevBtn').disabled = (logCurrentPage === 1);
+      document.getElementById('logNextBtn').disabled = (logCurrentPage === totalPages || totalRows === 0);
+    }
+
+    // 🌟 สร้างแถว HTML ของตารางกิจกรรม
+    function renderLogTableHTML(dataSubset) {
+      var tbody = document.getElementById('logTableBody');
+      tbody.innerHTML = ''; 
+      
+      dataSubset.forEach(function(row) {
+        var statusBadge = row[6] === 'SUCCESS' ? '<span class="badge bg-success">SUCCESS</span>' : '<span class="badge bg-danger">FAILED</span>';
+        var typeBadge = 'bg-secondary';
+        
+        // ใส่สีแยกแยะประเภทกิจกรรมให้มองหาและวิเคราะห์ง่ายขึ้น
+        if(row[3] === 'AUTH') typeBadge = 'bg-primary';
+        if(row[3] === 'CREATE') typeBadge = 'bg-info text-dark';
+        if(row[3] === 'UPDATE') typeBadge = 'bg-warning text-dark';
+        if(row[3] === 'DELETE') typeBadge = 'bg-danger';
+
+        var trHTML = '<tr>' +
+          '<td>' + row[0] + '</td>' + 
+          '<td><b>' + row[1] + '</b> <span class="badge bg-light text-dark">' + row[2] + '</span></td>' + 
+          '<td><span class="badge ' + typeBadge + '">' + row[3] + '</span></td>' + 
+          '<td><code>' + row[4] + '</code></td>' + 
+          '<td>' + row[5] + '</td>' + 
+          '<td>' + statusBadge + '</td>' + 
+          '<td class="small text-wrap" style="max-width: 300px; font-size: 0.82rem;">' + row[7] + '</td>' + 
+        '</tr>';
+        tbody.innerHTML += trHTML;
+      });
+    }
+
+    function changeLogPage(step) {
+      logCurrentPage += step;
+      updateLogTableAndPagination();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 🌟 ระบบกรองข้อมูลประวัติ Realtime
+    function filterLogTable() {
+      var searchInput = document.getElementById('logSearchInput').value.toLowerCase().trim();
+      var typeFilter = document.getElementById('logTypeFilter').value;
+
+      filteredLogData = globalLogData.filter(function(row) {
+        var matchSearch = (row[1] && row[1].toLowerCase().indexOf(searchInput) !== -1) || 
+                          (row[4] && row[4].toLowerCase().indexOf(searchInput) !== -1) ||
+                          (row[7] && row[7].toLowerCase().indexOf(searchInput) !== -1);
+        var matchType = typeFilter === "" ? true : (row[3] === typeFilter);
+        return matchSearch && matchType;
+      });
+
+      logCurrentPage = 1;
+      updateLogTableAndPagination();
+    }
+
+    // 🌟 💾 ระบบดาวน์โหลดสำรองข้อมูลเป็นไฟล์ CSV (ตัดประมวลผลฝั่ง Client ปลอดภัยสูง)
+    function downloadLogCSV() {
+      if (globalLogData.length === 0) { alert("ไม่มีข้อมูลประวัติกิจกรรมให้ดาวน์โหลดสำรองครับ"); return; }
+      
+      var csvContent = "\uFEFF"; 
+      csvContent += "Timestamp,User,Role,Action Type,Action Name,Target ID,Status,Details\n";
+      
+      globalLogData.forEach(function(row) {
+        var processedRow = row.map(function(cell) {
+          var str = cell ? cell.toString().replace(/"/g, '""') : '';
+          return '"' + str + '"'; 
+        });
+        csvContent += processedRow.join(",") + "\n";
+      });
+      
+      var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement("a");
+      var url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      
+      var now = new Date();
+      var dateStr = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + now.getDate();
+      link.setAttribute("download", "PHC_GIS_AuditLog_Backup_" + dateStr + ".csv");
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // 🌟 🧹 ระบบสั่งล้างชีทเพื่อเคลียร์หน่วยความจำป้องกันฐานข้อมูลบวม (แก้ไขจุดเสถียรภาพเรียบร้อย)
+    async function clearLogSheet() {
+      // ✅ ล็อคเป้าหมายปุ่มกดไว้ที่บรรทัดแรกสุด ก่อนโดนหน้าต่าง confirm ขัดจังหวะระบบ
+      var btn = (window.event && window.event.target) ? window.event.target : null;
+      var originalHTML = btn ? btn.innerHTML : '<i class="bi bi-trash3"></i> ล้างข้อมูลค้างชีท';
+
+      if (confirm("⚠️ ข้อควรระวังขั้นวิกฤตความปลอดภัย:\nคุณกำลังจะลบข้อมูลแถวกิจกรรมทั้งหมดออกจากชีท AuditLog เพื่อเพิ่มพื้นที่ให้ Google Sheets\n\nกรุณาตรวจสอบว่าคุณกดปุ่ม 'สำรองข้อมูล (CSV)' เพื่อเก็บไฟล์หลักฐานลงคอมพิวเตอร์ของคุณแล้วเรียบร้อย\n\nคุณยืนยันที่จะทำการล้างข้อมูลกิจกรรมทั้งหมดหรือไม่?")) {
+        
+        if (btn) { btn.disabled = true; btn.innerText = "กำลังสั่งเคลียร์หน้าชีท..."; }
+        
+        var res = await callAPI("clearAuditLog");
+        alert(res.message || "ล้างฐานข้อมูลสำเร็จ");
+        
+        if (btn) { btn.disabled = false; btn.innerHTML = originalHTML; }
+        if (res && res.success) {
+          await loadAuditLog(); 
+        }
+      }
+    }
+// ====================================================================
+    // 🌟 [คุณสมบัติ อสม.พลัส เพิ่มใหม่]: ฟังก์ชันฝั่ง Client ควบคุมข้อมูลโปรไฟล์และรายงาน
+    // ====================================================================
+    var rawOsmDashData = []; // เก็บสำรองก้อนข้อมูล อสม.พลัส ทั้งหมด
+
+    // 🌟 1. ดึงข้อมูลส่วนตัว อสม.พลัส ขึ้นมาแสดงผลในแบบฟอร์ม
+    async function loadOsmProfileData() {
+      var btn = document.getElementById('btnSaveProfile');
+      if(btn) btn.disabled = true;
+      
+      var res = await callAPI("getOsmProfile");
+      if (res && res.success) {
+        var profile = res.data;
+        document.getElementById('profilePreview').src = profile.imgUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+        document.getElementById('profileNameDisplay').innerText = profile.name || "-";
+        document.getElementById('profileCommDisplay').innerText = profile.community || "ไม่ระบุชุมชน";
+        document.getElementById('profileIdCardDisplay').innerText = profile.idCard || "-";
+        document.getElementById('profileHnDisplay').innerText = profile.hn || "-";
+        
+        // เติมลงในฟอร์มแก้ไข
+        document.getElementById('profilePhone').value = profile.phone || "";
+        document.getElementById('profileLineId').value = profile.lineId || "";
+        document.getElementById('profileEmail').value = profile.email || "";
+        document.getElementById('profileAddress').value = profile.address || "";
+        document.getElementById('profileImgUrl').value = profile.imgUrl || "";
+      } else {
+        alert(res.message || "ไม่สามารถเปิดอ่านข้อมูลทะเบียนโปรไฟล์ได้");
+      }
+      if(btn) btn.disabled = false;
+    }
+
+    // 🌟 2. สั่งส่งข้อมูลอัปเดตประวัติ อสม.พลัส และภาพถ่ายส่วนตัวกลับไปบันทึกลงฐานข้อมูลชีท
+    async function saveOsmProfile() {
+      var btn = document.getElementById('btnSaveProfile');
+      var originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>กำลังบันทึกข้อมูล...';
+
+      var payload = {
+        phone: document.getElementById('profilePhone').value.trim(),
+        lineId: document.getElementById('profileLineId').value.trim(),
+        email: document.getElementById('profileEmail').value.trim(),
+        address: document.getElementById('profileAddress').value.trim(),
+        imgUrl: document.getElementById('profileImgUrl').value.trim()
+      };
+
+      var res = await callAPI("updateOsmProfile", payload);
+      alert(res.message || res || "บันทึกเรียบร้อย");
+      
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+      await loadOsmProfileData(); // โหลดรูปภาพใหม่และข้อมูลขึ้นอัปเดตหน้าฟอร์มอีกครั้ง
+    }
+
+    // 🌟 3. โหลดโครงข่ายรายชื่อ อสม.พลัส ทั้งหมดเพื่อประกอบตารางรายงานภาพรวมข้อมูล
+    async function loadOsmDashboardData() {
+      var tbody = document.getElementById('osmDashTableBody');
+      if(!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังคำนวณสถิติประชากร อสม.พลัส...</td></tr>';
+      
+      var res = await callAPI("getOsmDashboardData");
+      if (res && res.success && res.data && res.data.length > 1) {
+        var headers = res.data[0];
+        rawOsmDashData = res.data.slice(1); // ตัดหัวแถวออกเก็บเอาไว้คัดกรอง
+        
+        // สร้างรายการ Dropdown คัดกรองรายชุมชนโดยไม่ให้ชื่อซ้ำกัน
+        var commIdx = headers.indexOf("community");
+        var commSelect = document.getElementById('dashCommunityFilter');
+        var uniqueCommunities = new Set();
+        
+        rawOsmDashData.forEach(function(row) {
+          if(row[commIdx]) uniqueCommunities.add(row[commIdx].toString().trim());
+        });
+        
+        // ล้างตัวเลือกเก่าออกก่อนใส่ตัวเลือกใหม่
+        commSelect.innerHTML = '<option value="">-- แสดงผลทุกชุมชนในระบบ --</option>';
+        Array.from(uniqueCommunities).sort().forEach(function(cName) {
+          if(cName !== "") {
+            commSelect.innerHTML += '<option value="' + cName + '">' + cName + '</option>';
+          }
+        });
+        
+        renderOsmDashboardTable(rawOsmDashData, headers);
+      } else {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">❌ ล้มเหลว: ไม่สามารถประมวลผลข้อมูลข้ามระบบได้</td></tr>';
+      }
+    }
+
+    // 🌟 4. เรนเดอร์สร้างแถวรายการข้อมูล อสม.พล็อตลงตาราง html พร้อมระบบกรอง Realtime
+    function renderOsmDashboardTable(rows, headers) {
+      var tbody = document.getElementById('osmDashTableBody');
+      tbody.innerHTML = '';
+      
+      var col = {
+        name: headers.indexOf("ชื่อ"),
+        moo: headers.indexOf("หมู่-หมู่บ้าน"),
+        phone: headers.indexOf("หมายเลขโทรศัพท์"),
+        img: headers.indexOf("ลิงก์รูปภาพ"),
+        line: headers.indexOf("Line ID"),
+        comm: headers.indexOf("community"),
+        hn: headers.indexOf("HN")
+      };
+
+      if(rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">ไม่มีข้อมูลของ อสม. ในเขตพื้นที่นี้</td></tr>';
+        document.getElementById('dashOsmCount').innerText = "0";
+        return;
+      }
+
+      rows.forEach(function(r) {
+        var safeImg = r[col.img] ? r[col.img].toString().trim() : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+        var tr = '<tr>' +
+          '<td class="text-center"><img src="' + safeImg + '" class="rounded-circle shadow-sm" style="width:42px; height:42px; object-fit:cover; border: 2px solid #E6E6FA;"></td>' +
+          '<td><b>' + (r[col.name] || '-') + '</b></td>' +
+          '<td class="text-center"><span class="badge bg-light text-dark">ม.' + (r[col.moo] || '-') + '</span></td>' +
+          '<td><i class="bi bi-geo-alt text-danger me-1"></i>' + (r[col.comm] || '-') + '</td>' +
+          '<td class="text-center font-monospace">' + (r[col.phone] || '-') + '</td>' +
+          '<td class="text-center">' + (r[col.line] || '-') + '</td>' +
+          '<td class="text-center"><span class="font-monospace text-secondary">' + (r[col.hn] || '-') + '</span></td>' +
+        '</tr>';
+        tbody.innerHTML += tr;
+      });
+      
+      document.getElementById('dashOsmCount').innerText = rows.length;
+    }
+
+    // 🌟 5. ตัวรับคำสั่งกรองเหตุการณ์เมื่อผู้ใช้งานเลือกสลับค่าใน Dropdown ชุมชนหน้า Dashboard
+    function filterOsmDashboard() {
+      var selectFilter = document.getElementById('dashCommunityFilter').value.trim();
+      if (!rawOsmDashData || rawOsmDashData.length === 0) return;
+      
+      // ดึง Header ปลอมขึ้นมาวิเคราะห์หาตำแหน่งคอลัมน์ชุมชนบ้าน
+      var headers = ["ลำดับ", "ชื่อ", "ID", "หมู่-หมู่บ้าน", "หมายเลขโทรศัพท์", "ที่อยู่", "ลิงก์รูปภาพ", "Email", "Line ID", "community", "HN", "ชื่อ - สกุล"];
+      var commIdx = headers.indexOf("community");
+      
+      var filteredRows = [];
+      if(selectFilter === "") {
+        filteredRows = rawOsmDashData;
+      } else {
+        filteredRows = rawOsmDashData.filter(function(row) {
+          return row[commIdx] && row[commIdx].toString().trim() === selectFilter;
+        });
+      }
+      
+      renderOsmDashboardTable(filteredRows, headers);
+    }
+    
   </script>
 </body>
 </html>
