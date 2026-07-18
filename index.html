@@ -896,39 +896,37 @@
     const API_KEY = "Tph-Osm-Gis-SecureKey-2026-XyZ"; 
 
     async function callAPI(action, params = {}) {
-      try {
-        const url = new URL(API_URL);
-        url.searchParams.set("action", action);
-        url.searchParams.set("apiKey", API_KEY);
+  try {
+    const url = new URL(API_URL);
+    url.searchParams.set("action", action);
+    url.searchParams.set("apiKey", API_KEY);
 
-        if (currentUser) {
-          url.searchParams.set("currentUser", JSON.stringify({
-            user: currentUser.username || currentUser.user || document.getElementById('loginUser').value,
-            type: currentUser.type || "user"
-          }));
-        }
-
-        Object.keys(params).forEach(function(key) {
-          var value = params[key];
-          if (value === undefined || value === null) return;
-          if (typeof value === "object") {
-            url.searchParams.set(key, JSON.stringify(value));
-          } else {
-            url.searchParams.set(key, value);
-          }
-        });
-
-        const response = await fetch(url.toString(), {
-          method: "GET",
-          cache: "no-store"
-        });
-
-        return await response.json();
-      } catch (error) {
-        console.error("API Error:", error);
-        return { success: false, message: error.message || "API error" };
-      }
+    // 🌟 แก้ไขจุดนี้เรียบร้อย: ส่งโครงสร้าง currentUser ไปทั้งหมดเพื่อให้ getAuthUser_ ฝั่งหลังบ้านทำงานได้สมบูรณ์
+    if (currentUser) {
+      url.searchParams.set("currentUser", JSON.stringify(currentUser));
     }
+
+    Object.keys(params).forEach(function(key) {
+      var value = params[key];
+      if (value === undefined || value === null) return;
+      if (typeof value === "object") {
+        url.searchParams.set(key, JSON.stringify(value));
+      } else {
+        url.searchParams.set(key, value);
+      }
+    });
+
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error:", error);
+    return { success: false, message: error.message || "API error" };
+  }
+}
 
     var globalHouseData = [];    
     var filteredDataGlobal = []; 
