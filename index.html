@@ -3,168 +3,241 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ระบบข้อมูล อสม. ชุมชน</title>
+  <title>ระบบข้อมูลสุขภาพ อสม. พลัส (VHV Plus)</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background-color: #f4f6f9;
+      color: #111111;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    /* 🔐 หน้าจอ Login เต็มหน้าจอ ซ่อนองค์ประกอบอื่น */
     #loginSection {
       height: 100vh;
+      width: 100vw;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 2000;
+      background-color: #1a1c1e;
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #212529;
-    }
-    
-    body {
-      font-family: 'Sarabun', sans-serif;
-      background-color: #e9ecef;
-      padding-top: 70px;
-      color: #111111; /* 🌟 เพิ่มความเข้มสีของตัวอักษรหลักทั่วหน้าจอ */
     }
 
-    /* 🌟 ปรับสีหลักของระบบให้เข้ม คมชัด (High Contrast Deep Color) */
-    .navbar {
+    /* 🖥️ โครงสร้างเมนูด้านซ้ายมือ (Sidebar Layout) สำหรับ PC */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 260px;
+      background-color: #111111;
+      border-right: 3px solid #0f5132;
+      z-index: 1040;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar.collapsed {
+      width: 70px;
+    }
+    .sidebar-header {
+      padding: 15px;
+      background-color: #0f5132;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .sidebar-menu {
+      flex-grow: 1;
+      padding: 10px 0;
+      overflow-y: auto;
+    }
+    .sidebar-menu .nav-link {
+      color: #cfd2d6;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      border-left: 4px solid transparent;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .sidebar-menu .nav-link:hover {
+      background-color: #1c1f22;
+      color: white;
+    }
+    .sidebar-menu .nav-link.active {
+      background-color: #0f5132;
+      color: white;
+      border-left-color: #198754;
+      font-weight: 600;
+    }
+    .sidebar.collapsed .nav-link span {
+      display: none;
+    }
+    .sidebar.collapsed .nav-link {
+      justify-content: center;
+      padding: 15px 0;
+      border-left: 0;
+    }
+
+    /* 📦 พื้นที่เนื้อหาหลัก (Main Content Area) */
+    .content-wrapper {
+      margin-left: 260px;
+      transition: all 0.3s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .content-wrapper.expanded {
+      margin-left: 70px;
+    }
+    
+    .top-bar {
+      background-color: white;
+      height: 60px;
+      border-bottom: 1px solid #dee2e6;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      justify-content: space-between;
+    }
+
+    /* 📱 การจัดการเมนูสำหรับ Smart Phone */
+    .mobile-header {
+      background-color: #0f5132;
+      color: white;
+      height: 55px;
+      display: none;
+      align-items: center;
+      padding: 0 15px;
       position: fixed;
       top: 0;
       width: 100%;
       z-index: 1030;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.2);
-      background-color: #0f5132 !important; /* เข้มเขียวสากลสาธารณสุข */
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 65px;
+      background-color: #111111;
+      display: none;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1050;
+      border-top: 2px solid #0f5132;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .bottom-nav .nav-link {
+      color: #b2b2b2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.65rem;
+      text-decoration: none;
+      flex: 1;
+    }
+    .bottom-nav .nav-link i { font-size: 1.2rem; }
+    .bottom-nav .nav-link.active {
+      color: #ffffff;
+      background-color: #0f5132;
+      font-weight: bold;
     }
 
-    .bg-success { background-color: #0f5132 !important; }
-    .text-success { color: #0f5132 !important; }
-    .btn-success { background-color: #146c43 !important; border-color: #146c43 !important; }
-    .btn-success:hover { background-color: #0f5132 !important; }
-    .btn-primary { background-color: #0a58ca !important; border-color: #0a58ca !important; }
-    .btn-warning { background-color: #d39e00 !important; color: #111 !important; }
-    
+    /* High Contrast Style */
     .table th {
-      white-space: nowrap;
       background-color: #0f5132 !important;
-      color: #ffffff !important;
+      color: white !important;
       font-weight: 600;
-    }
-
-    .card {
-      border: 1px solid #ced4da;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+      vertical-align: middle;
     }
     .card-header {
-      font-weight: 600;
       background-color: #146c43 !important;
       color: white !important;
+      font-weight: 600;
     }
-
-    @media (max-width: 767.98px) {
-      body { padding-bottom: 80px; }
-      .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 65px;
-        background-color: #111111;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        z-index: 1050;
-        border-top: 2px solid #0f5132;
-        padding-bottom: env(safe-area-inset-bottom);
-      }
-      .bottom-nav .nav-link {
-        color: #b2b2b2;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 0.68rem;
-        text-decoration: none;
-        flex: 1;
-      }
-      .bottom-nav .nav-link i { font-size: 1.25rem; }
-      .bottom-nav .nav-link.active {
-        color: #ffffff;
-        font-weight: bold;
-        background-color: #0f5132;
-      }
-    }
-
-    @media (min-width: 768px) { .bottom-nav { display: none !important; } }
     .page-section { display: none !important; }
-    .active-section { display: block !important; animation: fadeIn 0.2s ease-in-out; }
-    
+    .active-section { display: block !important; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none !important; }
+      .content-wrapper { margin-left: 0 !important; padding-top: 55px; padding-bottom: 70px; }
+      .top-bar { display: none !important; }
+      .mobile-header { display: flex !important; }
+      .bottom-nav { display: flex !important; }
+    }
+
     /* ====================================================================
-       🌟 CSS ปรับแต่งการสั่งพิมพ์หน้ากระดาษอย่างละเอียดระดับมืออาชีพ (Print Mode)
+       🌟 ระบบจัดการจัดพิมพ์หน้ารายงาน สรุป อสม. แนวนอน (Landscape A4) พอดีหน้ากระดาษ
        ==================================================================== */
     @media print {
       @page {
-        size: A4 landscape; /* บังคับกระดาษแนวนอนเพื่อให้พอดีข้อมูลสรุป อสม. */
-        margin: 8mm;
+        size: A4 landscape; /* บังคับหน้าพิมพ์เป็นแนวนอนโดยเฉพาะ */
+        margin: 6mm;
       }
-      body { 
-        background-color: #ffffff !important; 
-        padding: 0 !important; 
-        margin: 0 !important;
-        color: #000000 !important;
-        font-size: 11pt;
-      }
-      /* ซ่อนเมนู ปุ่ม ลิงก์ และฟิลเตอร์การเลือกทั้งหมด */
-      .navbar, .bottom-nav, .no-print, .btn, .input-group, select, .card-footer, hr { 
-        display: none !important; 
-      }
-      .container, .card, .card-body {
-        width: 100% !important;
-        max-width: 100% !important;
+      body {
+        background-color: white !important;
+        color: black !important;
         padding: 0 !important;
-        margin: 0 !important;
-        box-shadow: none !important;
-        border: none !important;
       }
-      /* แสดงหน้าจอรายงานที่จะพิมพ์ให้เด่นชัด */
+      .sidebar, .top-bar, .mobile-header, .bottom-nav, .no-print, .btn, select, input, .card-footer {
+        display: none !important;
+      }
+      .content-wrapper {
+        margin-left: 0 !important;
+        padding: 0 !important;
+      }
+      .card {
+        border: none !important;
+        box-shadow: none !important;
+      }
       .page-section { display: none !important; }
-      .active-section { display: block !important; }
+      #osmDashboard.active-section { display: block !important; }
       
-      /* ปรับแต่งตารางให้พอดีหน้ากระดาษและคมชัด */
       table {
         width: 100% !important;
-        table-layout: auto !important;
         border-collapse: collapse !important;
-        page-break-inside: auto;
+        table-layout: fixed !important; /* บังคับฟิกซ์ความกว้างไม่ให้ล้นเล็ดลอด */
       }
-      tr { page-break-inside: avoid; page-break-after: auto; }
-      th, td { 
-        border: 1px solid #000000 !important; 
-        padding: 6px !important; 
-        color: #000000 !important;
-        background-color: transparent !important;
-      }
-      th { font-weight: bold !important; text-align: center !important; }
-      
-      /* บังคับตัดคำรายการบ้านเลขที่ยาวๆ ป้องกันตารางหลุดขอบกระดาษขวา */
-      td:last-child, .text-wrap {
-        word-break: break-word !important;
+      th, td {
+        border: 1px solid #111111 !important;
+        padding: 5px !important;
+        font-size: 10pt !important;
+        word-break: break-word !important; /* สั่งตัดคำรหัสประจำบ้านและรายการบ้านเลขที่ยาวๆ */
         white-space: normal !important;
       }
-      img { max-width: 50px !important; max-height: 50px !important; }
+      th { background-color: #eaeaea !important; color: black !important; }
+      img { width: 45px !important; height: 45px !important; }
     }
   </style>
 </head>
 <body>
 
-  <!-- 🔐 หน้าล็อกอินสไตล์ High-Contrast -->
-  <div id="loginSection" class="d-flex align-items-center justify-content-center">
-    <div class="card border-0 shadow-lg bg-light" style="width: 100%; max-width: 420px; border-radius: 15px;">
-      <div class="card-body p-5 text-center">
-        <img id="loginLogo" src="https://cdn-icons-png.flaticon.com/512/3211/3211184.png" alt="Logo" class="mb-4 shadow-sm" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover;">
-        <h4 class="fw-bold mb-1 text-dark">ระบบ PHC-GIS ข้อมูลสุขภาพ</h4>
-        <p class="text-secondary small mb-4">ศูนย์บริการสาธารณสุขบ้านโทกหัวช้าง</p>
+  <!-- 🔐 หน้าจอล็อกอินแยกเดี่ยว (ป้องกันเมนูหลุดแสดง) -->
+  <div id="loginSection">
+    <div class="card border-0 shadow-lg bg-light" style="width: 100%; max-width: 400px; border-radius: 12px;">
+      <div class="card-body p-4 text-center">
+        <img id="loginLogo" src="https://cdn-icons-png.flaticon.com/512/3211/3211184.png" alt="Logo" class="mb-3 shadow-sm" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover;">
+        <h4 class="fw-bold text-dark mb-1">ระบบ อสม. พลัส (VHV Plus)</h4>
+        <p class="text-secondary small mb-4">ศบส.บ้านโทกหัวช้าง / สสอ.เกาะคา</p>
         
-        <div class="alert alert-danger mb-3" id="loginError" style="display: none; font-size: 0.88rem;">
-          <i class="bi bi-exclamation-triangle-fill"></i> ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!
+        <div class="alert alert-danger mb-3 py-2" id="loginError" style="display: none; font-size: 0.85rem;">
+          <i class="bi bi-exclamation-triangle-fill"></i> รหัสผ่านผู้ใช้งานไม่ถูกต้อง!
         </div>
 
         <div class="form-floating mb-3">
@@ -174,330 +247,285 @@
 
         <div class="form-floating mb-4 position-relative">
           <input type="password" class="form-control" id="loginPass" placeholder="Password">
-          <label for="loginPass"><i class="bi bi-lock me-2"></i>รหัสผ่านเข้าระบบ</label>
+          <label for="loginPass"><i class="bi bi-lock me-2"></i>รหัสผ่าน</label>
           <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent text-muted" onclick="togglePassword()">
             <i id="toggleIcon" class="bi bi-eye-slash fs-5"></i>
           </button>
         </div>
 
-        <button class="btn btn-success w-100 py-3 fw-bold shadow" onclick="checkLogin()">
-          <i class="bi bi-box-arrow-in-right me-2"></i>เข้าสู่ระบบข้อมูล
+        <button class="btn btn-success w-100 py-2.5 fw-bold shadow" onclick="checkLogin()">
+          <i class="bi bi-box-arrow-in-right me-2"></i>เข้าสู่ระบบข้อมูลสาธารณสุข
         </button>
       </div>
     </div>
-  </div> 
+  </div>
 
-  <!-- Main Content Section -->
-  <div id="mainContent">
-    <!-- 🌟 จัดระดับเลขลำดับเมนูบน PC Navbar (1-8) -->
-    <nav class="navbar navbar-expand-md navbar-dark shadow sticky-top">
-      <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="#">
-          <img id="navLogo" src="" alt="Logo" style="height: 30px; margin-right: 8px; display: none; border-radius: 4px;">
-          <i class="bi bi-geo-alt-fill"></i> ระบบ PHC-GIS ศบส.บ้านโทกหัวช้าง
-        </a>
-        
-        <div class="navbar-text text-white ms-auto me-2">
-          <small><i class="bi bi-person-circle"></i> <span id="userDisplayName" class="fw-bold"></span> (<span id="userDisplayMoo"></span>)</small>
-        </div>
-        
-        <div class="collapse navbar-collapse d-none d-md-flex" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link active" id="btn-dashboard" href="#" onclick="showPage('dashboard')">1. Dashboard ชุมชน</a></li>
-            <li class="nav-item"><a class="nav-link" id="btn-manageData" href="#" onclick="showPage('manageData')">2. จัดการข้อมูลบ้าน</a></li>
-            <li class="nav-item"><a class="nav-link" id="btn-searchHouse" href="#" onclick="showPage('searchHouse')">3. ค้นหาพิกัดบ้าน</a></li>
-            <li class="nav-item"><a class="nav-link" id="btn-reportArea" href="#" onclick="showPage('reportArea')">4. พิมพ์รายงานแยกพื้นที่</a></li>
-            <li class="nav-item"><a class="nav-link" id="btn-osmProfile" href="#" onclick="showPage('osmProfile')">5. ประวัติ อสม. พลัส</a></li>
-            <li class="nav-item"><a class="nav-link" id="btn-osmDashboard" href="#" onclick="showPage('osmDashboard')">6. สรุปข้อมูล อสม. ชุมชน</a></li>
-            <li id="adminMenu" class="nav-item" style="display:none;"><a class="nav-link" id="btn-manageUser" href="#" onclick="showPage('manageUser')">7. ตั้งค่า Admin</a></li>
-            <li id="adminLogMenu" class="nav-item" style="display:none;"><a class="nav-link" id="btn-manageLog" href="#" onclick="showPage('manageLog')">8. จัดการ Log (PDPA)</a></li>
-            <li class="nav-item ms-2"><button class="btn btn-outline-light btn-sm mt-1" onclick="logout()"><i class="bi bi-box-arrow-right"></i> ออก</button></li>
-          </ul>
-        </div>
-      </div>
-    </nav> 
+  <!-- 📦 ส่วนประกอบระบบแอปพลิเคชันหลัก (ซ่อนไว้เริ่มต้น จะแสดงเมื่อล็อกอินสำเร็จ) -->
+  <div id="appWrapper" style="display: none;">
     
-    <!-- 🌟 จัดระดับเลขลำดับเมนูบนโทรศัพท์เคลื่อนที่ (Bottom Nav) -->
-    <div class="bottom-nav d-md-none" id="bottomNavMenu" style="display: none;">
+    <!-- 🖥️ แถบเมนูด้านซ้ายมือ (Sidebar) สำหรับ PC -->
+    <aside class="sidebar" id="mainSidebar">
+      <div class="sidebar-header">
+        <span class="fw-bold"><i class="bi bi-activity"></i> VHV Plus Menu</span>
+        <button class="btn btn-sm text-white border-0" onclick="toggleSidebar()"><i class="bi bi-list fs-5"></i></button>
+      </div>
+      <div class="sidebar-menu">
+        <a href="#" class="nav-link active" onclick="showPage('dashboard')"><i class="bi bi-speedometer2"></i> <span>1. Dashboard ชุมชน</span></a>
+        <a href="#" class="nav-link" onclick="showPage('manageData')"><i class="bi bi-house-door"></i> <span>2. จัดการข้อมูลบ้าน</span></a>
+        <a href="#" class="nav-link" onclick="showPage('searchHouse')"><i class="bi bi-search"></i> <span>3. ค้นหาพิกัดบ้าน</span></a>
+        <a href="#" class="nav-link" onclick="showPage('reportArea')"><i class="bi bi-printer"></i> <span>4. รายงานแยกพื้นที่</span></a>
+        <a href="#" class="nav-link" onclick="showPage('osmProfile')"><i class="bi bi-person-badge-fill"></i> <span>5. ประวัติ อสม. พลัส</span></a>
+        <a href="#" class="nav-link" onclick="showPage('osmDashboard')"><i class="bi bi-people-fill"></i> <span>6. สรุปข้อมูล อสม. ชุมชน</span></a>
+        <a href="#" class="nav-link" id="adminMenu" onclick="showPage('manageUser')" style="display:none;"><i class="bi bi-gear-fill"></i> <span>7. ตั้งค่า Admin</span></a>
+        <a href="#" class="nav-link" id="adminLogMenu" onclick="showPage('manageLog')" style="display:none;"><i class="bi bi-journal-text"></i> <span>8. จัดการ Log (PDPA)</span></a>
+      </div>
+      <div class="p-3 mt-auto border-top border-secondary no-print">
+        <button class="btn btn-outline-danger w-100 btn-sm" onclick="logout()"><i class="bi bi-box-arrow-left"></i> <span>ออกจากระบบ</span></button>
+      </div>
+    </aside>
+
+    <!-- 📱 แถบหัวบนสำหรับมือถือ -->
+    <header class="mobile-header">
+      <h6 class="mb-0 fw-bold"><i class="bi bi-geo-alt-fill"></i> ระบบข้อมูลสุขภาพ อสม.</h6>
+      <button class="btn btn-sm text-white ms-auto border-0" onclick="logout()"><i class="bi bi-box-arrow-right fs-5"></i></button>
+    </header>
+
+    <!-- 📱 แถบควบคุมล่างสำหรับมือถือ -->
+    <nav class="bottom-nav">
       <a href="#" class="nav-link active" id="bot-dashboard" onclick="showPage('dashboard')"><i class="bi bi-speedometer2"></i> 1.แดชบอร์ด</a>
       <a href="#" class="nav-link" id="bot-manageData" onclick="showPage('manageData')"><i class="bi bi-house-door"></i> 2.จัดการบ้าน</a>
       <a href="#" class="nav-link" id="bot-searchHouse" onclick="showPage('searchHouse')"><i class="bi bi-search"></i> 3.ค้นหาพิกัด</a>
       <a href="#" class="nav-link" id="bot-reportArea" onclick="showPage('reportArea')"><i class="bi bi-printer"></i> 4.รายงาน</a>
       <a href="#" class="nav-link" id="bot-osmProfile" onclick="showPage('osmProfile')"><i class="bi bi-person-badge-fill"></i> 5.ประวัติ</a>
-      <a href="#" class="nav-link" id="bot-osmDashboard" onclick="showPage('osmDashboard')"><i class="bi bi-people-fill"></i> 6.สรุป อสม.</a>
-      <a href="#" class="nav-link" id="bot-manageUser" onclick="showPage('manageUser')" style="display:none;"><i class="bi bi-people"></i> 7.Admin</a>
-      <a href="#" class="nav-link" id="bot-manageLog" onclick="showPage('manageLog')" style="display:none;"><i class="bi bi-journal-text"></i> 8.Log</a>
-    </div>
+      <a href="#" class="nav-link" id="bot-osmDashboard" onclick="showPage('osmDashboard')"><i class="bi bi-people-fill"></i> 6.สรุปข้อมูล</a>
+    </nav>
 
-    <!-- พื้นที่หน้าจอหลักแต่ละเพจ -->
-    <div class="container mt-4 mb-5">
-      
-      <!-- [1. หน้า Dashboard] -->
-      <div id="dashboard" class="page-section active-section">
-        <h3 class="mb-3 fw-bold"><i class="bi bi-pie-chart-fill text-success"></i> 1. Dashboard & ภาพรวมชุมชน</h3>
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm">
-              <div class="card-header"><i class="bi bi-bar-chart-line"></i> สรุปการลงพื้นที่</div>
-              <div class="card-body d-flex justify-content-center align-items-center">
-                <div id="pieChart" style="width: 100%; height: 350px;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-8 mb-3">
-            <div class="card h-100 shadow-sm">
-              <div class="card-header"><i class="bi bi-geo-alt"></i> แผนที่พิกัดบ้านในชุมชน</div>
-              <div class="card-body p-0">
-                <div id="map" style="width: 100%; height: 400px; z-index: 1;"></div>
-              </div>
-            </div>
-          </div>
+    <!-- พื้นที่หน้าจอเนื้อหาคอนเทนต์หลัก -->
+    <div class="content-wrapper" id="mainContentWrapper">
+      <div class="top-bar no-print">
+        <button class="btn btn-outline-dark btn-sm fw-bold" onclick="toggleSidebar()"><i class="bi bi-arrows-angle-contract"></i> ย่อ/ขยายแถบเมนู</button>
+        <div>
+          <small class="text-dark fw-bold"><i class="bi bi-person-circle"></i> ผู้ใช้งาน: <span id="userDisplayName"></span> (<span id="userDisplayMoo"></span>)</small>
         </div>
-        <div class="card shadow-sm mt-2">
-          <div class="card-header"><i class="bi bi-clipboard-data-fill"></i> สรุปความครอบคลุมรายหมู่และชุมชน</div>
-          <div class="card-body text-dark">
+      </div>
+
+      <div class="container-fluid p-4">
+        
+        <!-- [1. หน้า Dashboard] -->
+        <div id="dashboard" class="page-section active-section">
+          <h3 class="mb-3 fw-bold"><i class="bi bi-pie-chart-fill text-success"></i> 1. Dashboard ภาพรวมชุมชน</h3>
+          <div class="row">
+            <div class="col-lg-4 mb-3">
+              <div class="card h-100 shadow-sm">
+                <div class="card-header"><i class="bi bi-bar-chart-line"></i> สรุปสัดส่วนการลงยืนยันพื้นที่</div>
+                <div class="card-body d-flex justify-content-center align-items-center"><div id="pieChart" style="width: 100%; height: 320px;"></div></div>
+              </div>
+            </div>
+            <div class="col-lg-8 mb-3">
+              <div class="card h-100 shadow-sm">
+                <div class="card-header"><i class="bi bi-geo-alt"></i> แผนที่ตำแหน่งพิกัดบ้าน</div>
+                <div class="card-body p-0"><div id="map" style="width: 100%; height: 350px; z-index: 1;"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card shadow-sm mt-2">
+            <div class="card-header"><i class="bi bi-clipboard-data-fill"></i> สรุปจำแนกข้อมูลแยกตามชุมชน</div>
             <div class="table-responsive">
-              <table class="table table-striped table-hover align-middle border">
-                <thead>
-                  <tr>
-                    <th>หมู่</th><th>ชุมชน</th><th class="text-center">เป้าหมาย (หลัง)</th><th class="text-center">ยืนยันข้อมูล</th><th class="text-center">คงเหลือ</th><th>ความก้าวหน้า (%)</th>
-                  </tr>
-                </thead>
+              <table class="table table-striped table-hover align-middle border mb-0">
+                <thead><tr><th>หมู่</th><th>ชุมชน</th><th class="text-center">เป้าหมาย (หลัง)</th><th class="text-center">ยืนยันข้อมูล</th><th class="text-center">คงเหลือ</th><th>ความก้าวหน้า (%)</th></tr></thead>
                 <tbody id="summaryTableBody"></tbody>
               </table>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- [2. หน้าจัดการข้อมูลบ้าน] -->
-      <div id="manageData" class="page-section">
-        <h3 class="mb-3 fw-bold"><i class="bi bi-house-door text-success"></i> 2. จัดการข้อมูลบ้าน</h3>
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <div class="input-group mb-3">
-              <span class="input-group-text bg-white"><i class="bi bi-search text-success"></i></span>
-              <input type="text" id="searchInput" class="form-control" placeholder="ค้นหา บ้านเลขที่..." onkeyup="filterTable()">
-            </div>
-            <button class="btn btn-success mb-3 shadow" onclick="openAddHouseModal()"><i class="bi bi-plus-circle"></i> เพิ่มบ้านหลังใหม่</button>
-            <div class="table-responsive">
-              <table class="table table-bordered table-striped" id="houseTable">
-                <thead>
-                  <tr><th>บ้านเลขที่</th><th>รหัสประจำบ้าน 11 หลัก</th><th>ชุมชน</th><th>อสม.ที่ดูแล</th><th>สถานะ</th><th>จัดการ</th></tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-              </table>
-            </div>
-            <div class="d-flex justify-content-between align-items-center mt-3 bg-light p-2 rounded">
-              <small>หน้า <span id="currentPageDisplay" class="fw-bold">1</span> จาก <span id="totalPageDisplay" class="fw-bold">1</span></small>
-              <div>
-                <button class="btn btn-outline-secondary btn-sm" id="prevBtn" onclick="changePage(-1)"><i class="bi bi-chevron-left"></i> ก่อนหน้า</button>
-                <button class="btn btn-outline-secondary btn-sm" id="nextBtn" onclick="changePage(1)">ถัดไป <i class="bi bi-chevron-right"></i></button>
+        <!-- [2. หน้าจัดการข้อมูลบ้าน] -->
+        <div id="manageData" class="page-section">
+          <h3 class="mb-3 fw-bold"><i class="bi bi-house-door text-success"></i> 2. จัดการข้อมูลหลังคาเรือน</h3>
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <div class="row g-2 mb-3">
+                <div class="col-md-9"><input type="text" id="searchInput" class="form-control border-dark" placeholder="🔍 พิมพ์ค้นหาด้วย บ้านเลขที่..." onkeyup="filterTable()"></div>
+                <div class="col-md-3"><button class="btn btn-success w-100 fw-bold shadow" onclick="openAddHouseModal()"><i class="bi bi-plus-circle"></i> เพิ่มหลังคาเรือนใหม่</button></div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- [3. หน้าค้นหาพิกัดบ้าน] -->
-      <div id="searchHouse" class="page-section">
-        <h3 class="mb-3 fw-bold"><i class="bi bi-search text-primary"></i> 3. ค้นหาพิกัดบ้าน</h3>
-        <div class="card shadow-sm mb-3">
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-md-4"><label class="form-label fw-bold">1. เลือกหมู่</label><select id="searchMoo" class="form-select" onchange="updateSearchCommunity()"><option value="">-- เลือกหมู่ --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div>
-              <div class="col-md-4"><label class="form-label fw-bold">2. เลือกชุมชน</label><select id="searchComm" class="form-select" onchange="updateSearchHouse()"><option value="">-- รอเลือกหมู่ --</option></select></div>
-              <div class="col-md-4"><label class="form-label fw-bold">3. เลือกบ้านเลขที่</label><select id="searchHouseSelect" class="form-select" onchange="locateHouseOnMap()"><option value="">-- รอเลือกชุมชน --</option></select></div>
-            </div>
-          </div>
-        </div>
-        <div class="card shadow-sm"><div class="card-body p-0"><div id="searchMapArea" style="width: 100%; height: 450px; z-index: 1;"></div></div></div>
-      </div>
-
-      <!-- [4. หน้าพิมพ์รายงาน] -->
-      <div id="reportArea" class="page-section">
-        <div class="d-flex justify-content-between align-items-center mb-3 no-print">
-          <h3 class="fw-bold"><i class="bi bi-printer-fill text-dark"></i> 4. พิมพ์รายงานความรับผิดชอบ</h3>
-          <button class="btn btn-dark shadow" onclick="window.print()"><i class="bi bi-printer"></i> สั่งพิมพ์หน้านี้</button>
-        </div>
-        <div class="card shadow-sm mb-4 no-print">
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-md-4"><label class="form-label fw-bold">1. เลือกหมู่</label><select id="reportMoo" class="form-select border-dark" onchange="updateReportFilters()"><option value="">-- เลือกหมู่ --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div>
-              <div class="col-md-4"><label class="form-label fw-bold">2. เลือกชุมชน</label><select id="reportComm" class="form-select border-dark" onchange="updateReportFiltersComm()"><option value="">-- ทุกชุมชนในหมู่นี้ --</option></select></div>
-              <div class="col-md-4"><label class="form-label fw-bold">3. เลือก อสม.</label><select id="reportAsm" class="form-select border-dark" onchange="generateReport()"><option value="">-- อสม. ทุกคน --</option></select></div>
-            </div>
-          </div>
-        </div>
-        <div id="printableReport" class="bg-white p-2 rounded">
-          <div class="text-center mb-3">
-            <h4 class="fw-bold text-dark">รายงานสรุปรายชื่อ อสม. และหลังคาเรือนที่รับผิดชอบ</h4>
-            <h6 id="reportHeader" class="text-secondary">กรุณาเลือกข้อมูลเพื่อแสดงรายงาน</h6>
-          </div>
-          <table class="table table-bordered align-middle">
-            <thead class="text-center">
-              <tr><th style="width: 8%;">ลำดับ</th><th style="width: 18%;">บ้านเลขที่</th><th style="width: 25%;">รหัสประจำบ้าน 11 หลัก</th><th>อสม. ผู้รับผิดชอบ</th><th style="width: 15%;">สถานะ</th></tr>
-            </thead>
-            <tbody id="reportTableBody">
-              <tr><td colspan="5" class="text-center py-4 text-muted">รอการเลือกข้อมูล...</td></tr>
-            </tbody>
-          </table>
-          <div class="d-flex justify-content-between align-items-center mt-3 report-pagination no-print">
-            <button class="btn btn-outline-secondary btn-sm" id="reportPrevBtn" onclick="changeReportPage(-1)"><i class="bi bi-chevron-left"></i></button>
-            <span class="small fw-bold">หน้าที่ <span id="reportCurrentPageDisplay">1</span> / <span id="reportTotalPageDisplay">1</span></span>
-            <button class="btn btn-outline-secondary btn-sm" id="reportNextBtn" onclick="changeReportPage(1)"><i class="bi bi-chevron-right"></i></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- [5. หน้าประวัติ อสม. พลัส] -->
-      <div id="osmProfile" class="page-section">
-        <h3 class="mb-3 fw-bold"><i class="bi bi-person-badge-fill text-dark"></i> 5. ประวัติ อสม. พลัส</h3>
-        <div class="card shadow-sm mb-4">
-          <div class="card-body p-4">
-            <div class="row">
-              <div class="col-md-4 text-center border-end pb-4">
-                <img id="profilePreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Avatar" class="img-thumbnail rounded-circle mb-3 shadow" style="width: 160px; height: 160px; object-fit: cover;">
-                <h5 class="fw-bold text-dark mb-1" id="profileNameDisplay">-</h5>
-                <span class="badge bg-dark px-3 py-2" id="profileCommDisplay">-</span>
-                <div class="mt-4 text-start bg-light p-3 rounded small border text-dark">
-                  <div class="mb-2"><b>เลขประจำตัว (ID):</b> <span id="profileIdCardDisplay">-</span></div>
-                  <div><b>รหัสทะเบียนผู้ป่วย (HN):</b> <span id="profileHnDisplay">-</span></div>
-                </div>
+              <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="houseTable">
+                  <thead><tr><th>บ้านเลขที่</th><th>รหัสประจำบ้าน 11 หลัก</th><th>ชุมชน</th><th>อสม.ผู้ดูแล</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+                  <tbody id="tableBody"></tbody>
+                </table>
               </div>
-              <div class="col-md-8 ps-md-4">
-                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-pencil-square me-2"></i>แก้ไขรายละเอียดข้อมูลส่วนตัว</h5>
-                <div class="row g-3">
-                  <div class="col-md-6"><label class="form-label fw-bold small">หมายเลขโทรศัพท์ติดต่อ</label><input type="text" class="form-control border-dark" id="profilePhone"></div>
-                  <div class="col-md-6"><label class="form-label fw-bold small">Line ID</label><input type="text" class="form-control border-dark" id="profileLineId"></div>
-                  <div class="col-12"><label class="form-label fw-bold small">ที่อยู่อีเมล (Email)</label><input type="email" class="form-control border-dark" id="profileEmail"></div>
-                  <div class="col-12"><label class="form-label fw-bold small">ที่อยู่ปัจจุบันตามทะเบียน อสม.</label><textarea class="form-control border-dark" id="profileAddress" rows="2"></textarea></div>
-                  <div class="col-12"><label class="form-label fw-bold small">ลิงก์ URL รูปภาพประจำตัวผู้ใช้</label><input type="text" class="form-control border-dark font-monospace small" id="profileImgUrl" oninput="document.getElementById('profilePreview').src=this.value"></div>
-                  <div class="col-12 text-end pt-3"><button class="btn btn-success px-4 fw-bold shadow" id="btnSaveProfile" onclick="saveOsmProfile()"><i class="bi bi-save me-2"></i>บันทึกการปรับปรุงข้อมูล</button></div>
+              <div class="d-flex justify-content-between align-items-center mt-3 bg-light p-2 rounded">
+                <small>หน้า <span id="currentPageDisplay" class="fw-bold">1</span> จาก <span id="totalPageDisplay" class="fw-bold">1</span></small>
+                <div>
+                  <button class="btn btn-outline-secondary btn-sm" id="prevBtn" onclick="changePage(-1)">ก่อนหน้า</button>
+                  <button class="btn btn-outline-secondary btn-sm" id="nextBtn" onclick="changePage(1)">ถัดไป</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- [6. หน้าภาพรวมรายงาน อสม.พลัส - รองรับการพิมพ์รายงานพอดีหน้ากระดาษ A4] -->
-      <div id="osmDashboard" class="page-section">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h3 class="fw-bold text-dark mb-0"><i class="bi bi-people-fill text-dark"></i> 6. สรุปข้อมูล อสม. ชุมชน</h3>
-          <button class="btn btn-dark shadow no-print" onclick="window.print()"><i class="bi bi-printer-fill me-2"></i>พิมพ์รายงาน อสม.</button>
-        </div>
-        <div class="card shadow-sm mb-4">
-          <div class="card-header border-0 pt-4 px-4 bg-dark">
-            <div class="row align-items-center">
-              <div class="col-md-6"><h5 class="fw-bold mb-0 text-white">ระบบรายงานสถิติทะเบียนสมาชิก อสม. แยกพื้นที่</h5></div>
-              <div class="col-md-6 no-print">
-                <select class="form-select border-light font-medium" id="dashCommunityFilter" onchange="filterOsmDashboard()"></select>
+        <!-- [3. หน้าค้นหาพิกัดบ้าน] -->
+        <div id="searchHouse" class="page-section">
+          <h3 class="mb-3 fw-bold"><i class="bi bi-search text-primary"></i> 3. ค้นหาพิกัดบ้านรายหลัง</h3>
+          <div class="card shadow-sm mb-3">
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-4"><label class="form-label fw-bold">เลือกหมู่</label><select id="searchMoo" class="form-select border-dark" onchange="updateSearchCommunity()"><option value="">-- เลือกหมู่ --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div>
+                <div class="col-md-4"><label class="form-label fw-bold">เลือกชุมชน</label><select id="searchComm" class="form-select border-dark" onchange="updateSearchHouse()"><option value="">-- รอระบุหมู่ --</option></select></div>
+                <div class="col-md-4"><label class="form-label fw-bold">เลือกบ้านเลขที่</label><select id="searchHouseSelect" class="form-select border-dark" onchange="locateHouseOnMap()"><option value="">-- รอระบุชุมชน --</option></select></div>
               </div>
             </div>
           </div>
-          <div class="card-body p-0 text-dark">
-            <div class="table-responsive">
-              <table class="table table-bordered table-striped align-middle mb-0" style="font-size: 0.95rem;">
+          <div class="card shadow-sm"><div class="card-body p-0"><div id="searchMapArea" style="width: 100%; height: 420px; z-index: 1;"></div></div></div>
+        </div>
+
+        <!-- [4. หน้าพิมพ์รายงานพื้นที่] -->
+        <div id="reportArea" class="page-section">
+          <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+            <h3 class="fw-bold"><i class="bi bi-printer-fill text-dark"></i> 4. พิมพ์รายงานประจำพื้นที่</h3>
+            <button class="btn btn-dark shadow" onclick="window.print()"><i class="bi bi-printer"></i> สั่งพิมพ์เอกสาร</button>
+          </div>
+          <div class="card shadow-sm mb-3 no-print">
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-6"><label class="form-label fw-bold">เลือกหมู่ข้อมูล</label><select id="reportMoo" class="form-select border-dark" onchange="updateReportFilters()"><option value="">-- เลือกหมู่ --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div>
+                <div class="col-md-6"><label class="form-label fw-bold">เลือกชุมชนย่อย</label><select id="reportComm" class="form-select border-dark" onchange="updateReportFiltersComm()"><option value="">-- ทุกชุมชนในหมู่นี้ --</option></select></div>
+              </div>
+            </div>
+          </div>
+          <div id="printableReport" class="bg-white p-3 rounded shadow-sm">
+            <div class="text-center mb-3">
+              <h5 class="fw-bold text-dark">ทะเบียนรายงานหลังคาเรือนการดูแลของสมาชิก อสม.</h5>
+              <div id="reportHeader" class="text-muted small">กรุณาระบุเงื่อนไขตัวเลือกการพิมพ์ด้านบน</div>
+            </div>
+            <table class="table table-bordered align-middle">
+              <thead class="text-center"><tr><th style="width:8%;">ลำดับ</th><th style="width:18%;">บ้านเลขที่</th><th>รหัสประจำบ้าน 11 หลัก</th><th>อสม. ผู้รับผิดชอบ</th><th style="width:18%;">สถานะการตรวจสอบ</th></tr></thead>
+              <tbody id="reportTableBody"><tr><td colspan="5" class="text-center py-4 text-muted">รอเลือกพล็อตรายงาน...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- [5. หน้าประวัติ อสม. พลัส] -->
+        <div id="osmProfile" class="page-section">
+          <h3 class="mb-3 fw-bold"><i class="bi bi-person-badge-fill text-dark"></i> 5. ทะเบียนประวัติส่วนบุคคล อสม. พลัส</h3>
+          <div class="card shadow-sm">
+            <div class="card-body p-4">
+              <div class="row">
+                <div class="col-md-4 text-center border-end pb-3">
+                  <img id="profilePreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Avatar" class="img-thumbnail rounded-circle mb-3 shadow" style="width: 150px; height: 150px; object-fit: cover;">
+                  <h5 class="fw-bold text-dark mb-1" id="profileNameDisplay">-</h5>
+                  <span class="badge bg-dark px-3 py-1.5" id="profileCommDisplay">-</span>
+                  <div class="mt-4 text-start bg-light p-3 rounded border text-dark font-medium small">
+                    <div class="mb-2"><b>หมายเลขบัตรประชาชน ID:</b> <span id="profileIdCardDisplay">-</span></div>
+                    <div><b>เลขทะเบียนผู้ป่วยประจำบ้าน HN:</b> <span id="profileHnDisplay">-</span></div>
+                  </div>
+                </div>
+                <div class="col-md-8 ps-md-4">
+                  <h6 class="fw-bold text-success mb-3"><i class="bi bi-pencil-square"></i> แก้ไขปรับปรุงข้อมูลช่องทางการติดต่อ</h6>
+                  <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label fw-bold small">เบอร์โทรศัพท์ติดต่อ</label><input type="text" class="form-control border-dark" id="profilePhone"></div>
+                    <div class="col-md-6"><label class="form-label fw-bold small">Line ID</label><input type="text" class="form-control border-dark" id="profileLineId"></div>
+                    <div class="col-12"><label class="form-label fw-bold small">ที่อยู่อีเมล (Email)</label><input type="email" class="form-control border-dark" id="profileEmail"></div>
+                    <div class="col-12"><label class="form-label fw-bold small">ที่อยู่ปัจจุบันตามทะเบียน</label><textarea class="form-control border-dark" id="profileAddress" rows="2"></textarea></div>
+                    <div class="col-12"><label class="form-label fw-bold small">ลิงก์ URL รูปถ่ายส่วนตัว</label><input type="text" class="form-control border-dark small" id="profileImgUrl" oninput="document.getElementById('profilePreview').src=this.value"></div>
+                    <div class="col-12 text-end pt-2"><button class="btn btn-success px-4 fw-bold shadow" onclick="saveOsmProfile()"><i class="bi bi-save me-2"></i>บันทึกการปรับปรุงประวัติ</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- [6. 🌟 หน้าจอรายงาน อสม. แนวนอนตามพล็อตไฟล์แนบพร้อมเชื่อมคำนวณหลังคาเรือน] -->
+        <div id="osmDashboard" class="page-section">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold text-dark mb-0"><i class="bi bi-people-fill"></i> 6. ทะเบียนสรุปประวัติและเขตรับผิดชอบ อสม. ชุมชน</h3>
+            <button class="btn btn-dark shadow no-print" onclick="window.print()"><i class="bi bi-printer-fill me-2"></i>พิมพ์รายงาน อสม. (แนวนอน)</button>
+          </div>
+          <div class="card shadow-sm">
+            <div class="card-header pt-3 px-3 bg-dark no-print">
+              <div class="row align-items-center">
+                <div class="col-md-7"><h6 class="mb-0 text-white fw-bold">กรองรายชื่อ อสม. แยกตามพื้นที่สังกัดชุมชนเพื่อสั่งพิมพ์ออกกระดาษ A4 แนวนอน</h6></div>
+                <div class="col-md-5"><select class="form-select form-select-sm border-light" id="dashCommunityFilter" onchange="filterOsmDashboard()"></select></div>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              <table class="table table-bordered table-striped align-middle mb-0">
                 <thead class="text-center">
                   <tr>
-                    <th style="width: 70px;">รูปถ่าย</th>
-                    <th class="text-start">ชื่อ - นามสกุล</th>
-                    <th>หมู่</th>
-                    <th class="text-start">ชุมชนที่สังกัด</th>
-                    <th>เบอร์โทรศัพท์</th>
-                    <th>Line ID</th>
-                    <th>เลขทะเบียน HN</th>
+                    <th style="width: 60px;">ลำดับ</th>
+                    <th style="width: 80px;">รูปภาพ</th>
+                    <th style="width: 160px;">ชื่อ อสม.</th>
+                    <th>ข้อมูลติดต่อประวัติส่วนตัว</th>
+                    <th style="width: 100px;">ดูแล (หลัง)</th>
+                    <th style="width: 300px;">รายการบ้านเลขที่รับผิดชอบ</th>
                   </tr>
                 </thead>
-                <tbody id="osmDashTableBody"></tbody>
+                <tbody id="osmDashTableBody">
+                  <tr><td colspan="6" class="text-center py-4 text-muted">กำลังคำนวณประมวลฐานข้อมูลข้ามไฟล์...</td></tr>
+                </tbody>
               </table>
             </div>
-            <div class="card-footer bg-white border-0 py-3 px-4 text-end text-dark fw-bold border-top">
-              รวมจำนวนสมาชิก อสม. ในตัวกรองปัจจุบัน: <span class="text-danger fs-5" id="dashOsmCount">0</span> คน
+            <div class="card-footer bg-light py-2 text-end text-dark small fw-bold no-print">
+              จำนวนสมาชิก อสม. ที่คัดกรองพล็อตปัจจุบัน: <span id="dashOsmCount" class="text-danger fw-bold fs-6">0</span> คน
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- [7. หน้าจัดการผู้ใช้งาน Admin] -->
-      <div id="manageUser" class="page-section">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h3 class="fw-bold"><i class="bi bi-people-fill text-dark"></i> 7. จัดการผู้ใช้งาน (Admin)</h3>
-          <button class="btn btn-primary shadow" onclick="openUserModal()"><i class="bi bi-person-plus"></i> เพิ่ม User ใหม่</button>
-        </div>
-        <div class="card shadow-sm mb-4 border-primary">
-          <div class="card-header bg-primary"><h5 class="mb-0 text-white"><i class="bi bi-gear-fill"></i> ตั้งค่าระบบ (ปรับแต่งโลโก้)</h5></div>
-          <div class="card-body">
-            <div class="input-group">
-              <input type="text" id="settingLogoUrl" class="form-control border-dark" placeholder="วางลิงก์รูปภาพโลโก้...">
-              <button class="btn btn-primary" onclick="saveLogo(this)"><i class="bi bi-save"></i> บันทึกโลโก้</button>
+        <!-- [7. หน้าจัดการผู้ใช้งาน Admin] -->
+        <div id="manageUser" class="page-section">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold"><i class="bi bi-people-fill"></i> 7. ตั้งค่าผู้ใช้ระบบ (Admin)</h3>
+            <button class="btn btn-primary shadow" onclick="openUserModal()"><i class="bi bi-person-plus"></i> เพิ่มบัญชีผู้ใช้ใหม่</button>
+          </div>
+          <div class="card shadow-sm mb-3 border-primary">
+            <div class="card-body">
+              <label class="form-label fw-bold small">ตั้งค่า URL ลิงก์โลโก้ของระบบหลัก</label>
+              <div class="input-group"><input type="text" id="settingLogoUrl" class="form-control border-dark"><button class="btn btn-primary" onclick="saveLogo(this)"><i class="bi bi-save"></i> บันทึกภาพ</button></div>
             </div>
           </div>
-        </div>
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <table class="table table-bordered table-striped align-middle">
-              <thead><tr><th>ID</th><th>ชื่อ-นามสกุล (หมู่)</th><th>ชุมชนที่ดูแล</th><th>สิทธิ์</th><th class="text-center">จัดการ</th></tr></thead>
+          <div class="card shadow-sm">
+            <table class="table table-bordered table-striped align-middle mb-0">
+              <thead><tr><th>ID</th><th>ชื่อผู้ใช้งาน (หมู่)</th><th>ชุมชนความรับผิดชอบ</th><th>ระดับสิทธิ์</th><th class="text-center">แก้ไข</th></tr></thead>
               <tbody id="userTableBody"></tbody>
             </table>
           </div>
         </div>
-      </div>
 
-      <!-- [8. หน้าจัดการระบบ Log (PDPA Audit Trail)] -->
-      <div id="manageLog" class="page-section">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h3 class="fw-bold text-danger"><i class="bi bi-journal-text"></i> 8. จัดการระบบ Log (PDPA Audit Trail)</h3>
-          <div>
-            <button class="btn btn-primary btn-sm shadow" onclick="downloadLogCSV()"><i class="bi bi-download"></i> สำรอง (CSV)</button>
-            <button class="btn btn-danger btn-sm shadow" onclick="clearLogSheet()"><i class="bi bi-trash3"></i> ล้าง Log</button>
-          </div>
-        </div>
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <div class="row g-2 mb-3">
-              <div class="col-md-6"><input type="text" id="logSearchInput" class="form-control border-dark" placeholder="ค้นหาประวัติกิจกรรม..." onkeyup="filterLogTable()"></div>
-              <div class="col-md-6"><select id="logTypeFilter" class="form-select border-dark" onchange="filterLogTable()"><option value="">-- ทุกกิจกรรม --</option><option value="AUTH">AUTH</option><option value="READ">READ</option><option value="CREATE">CREATE</option><option value="UPDATE">UPDATE</option><option value="DELETE">DELETE</option></select></div>
+        <!-- [8. หน้าจัดการระบบ Log (PDPA)] -->
+        <div id="manageLog" class="page-section">
+          <h3 class="mb-3 fw-bold text-danger"><i class="bi bi-journal-text"></i> 8. บันทึกกิจกรรมระบบความปลอดภัย (PDPA Audit Trail)</h3>
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <div class="row g-2 mb-3">
+                <div class="col-md-7"><input type="text" id="logSearchInput" class="form-control border-dark" placeholder="🔍 ค้นหา log ด้วยชื่อหรือคีย์กิจกรรม..." onkeyup="filterLogTable()"></div>
+                <div class="col-md-5"><select id="logTypeFilter" class="form-select border-dark" onchange="filterLogTable()"><option value="">-- กรองทุกประเภทสิทธิ์ --</option><option value="AUTH">AUTH</option><option value="READ">READ</option><option value="CREATE">CREATE</option><option value="UPDATE">UPDATE</option><option value="DELETE">DELETE</option></select></div>
+              </div>
+              <div class="table-responsive"><table class="table table-bordered table-striped text-dark small"><thead><tr><th>วัน-เวลา</th><th>ผู้ใช้งาน</th><th>สิทธิ์</th><th>ฟังก์ชัน</th><th>Target ID</th><th>สถานะ</th><th>รายละเอียดคำขอ</th></tr></thead><tbody id="logTableBody"></tbody></table></div>
             </div>
-            <table class="table table-bordered table-striped text-dark">
-              <thead><tr><th>วัน-เวลา</th><th>ผู้ใช้งาน</th><th>ประเภท</th><th>ชื่อฟังก์ชัน</th><th>Target ID</th><th>สถานะ</th><th>รายละเอียด</th></tr></thead>
-              <tbody id="logTableBody"></tbody>
-            </table>
           </div>
         </div>
-      </div>
 
+      </div>
     </div>
   </div>
 
-  <!-- Modals -->
+  <!-- MODALS SECTION -->
   <!-- 1. Edit House Modal -->
   <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content border-dark">
-        <div class="modal-header bg-success text-white">
-          <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square"></i> อัปเดตข้อมูลบ้าน</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
+        <div class="modal-header bg-success text-white"><h5 class="modal-title fw-bold"><i class="bi bi-pencil-square"></i> แก้ไขพิกัดและข้อมูลบ้าน</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body text-dark">
-          <input type="hidden" id="editHcode">
-          <div class="text-center mb-3"><span class="text-muted">บ้านเลขที่</span><h4 id="displayHouseNo" class="text-success fw-bold"></h4></div>
-          <div class="text-center mb-3"><span class="text-muted small">รหัสประจำบ้าน 11 หลัก</span><div id="displayHouseId11" class="fw-bold font-monospace text-secondary">-</div></div>
-          <div class="row mb-3">
-            <div class="col-4"><label class="form-label small fw-bold">หมู่ที่</label><input type="text" id="editMoo" class="form-control text-center" readonly></div>
-            <div class="col-8"><label class="form-label small fw-bold">ชุมชน</label><select id="editCommunity" class="form-select border-dark"></select></div>
-          </div>
-          <div class="mb-3"><label class="form-label fw-bold small">อสม. ผู้รับผิดชอบ</label><select id="editAsm" class="form-select border-dark"></select></div>
-          <div class="mb-3"><label class="form-label fw-bold small">สถานะข้อมูล</label><select class="form-select border-dark fw-bold" id="editStatus"><option value="ยังไม่ยืนยัน">ยังไม่ยืนยัน</option><option value="ยืนยันข้อมูล">ยืนยันข้อมูล</option></select></div>
+          <input type="hidden" id="editHcode"><div class="text-center mb-2"><span>บ้านเลขที่</span><h4 id="displayHouseNo" class="text-success fw-bold"></h4><div id="displayHouseId11" class="small font-monospace text-secondary"></div></div>
+          <div class="row mb-2"><div class="col-4"><label class="form-label small fw-bold">หมู่ที่</label><input type="text" id="editMoo" class="form-control text-center" readonly></div><div class="col-8"><label class="form-label small fw-bold">ชุมชนสกัด</label><select id="editCommunity" class="form-select border-dark"></select></div></div>
+          <div class="mb-3"><label class="form-label fw-bold small">อสม.ผู้รับผิดชอบหลัก</label><select id="editAsm" class="form-select border-dark"></select></div>
+          <div class="mb-3"><label class="form-label fw-bold small">สถานะเอกสาร</label><select class="form-select border-dark fw-bold" id="editStatus"><option value="ยังไม่ยืนยัน">ยังไม่ยืนยัน</option><option value="ยืนยันข้อมูล">ยืนยันข้อมูล</option></select></div>
           <div class="mb-3"><label class="form-label fw-bold small">หมายเหตุ</label><textarea id="editNote" class="form-control border-dark" rows="2"></textarea></div>
-          <div class="mb-3">
-            <label class="form-label fw-bold text-success small"><i class="bi bi-geo-alt"></i> พิกัดตำแหน่งบ้าน</label>
-            <div class="input-group mb-2"><input type="text" id="editLat" class="form-control border-dark" readonly><input type="text" id="editLng" class="form-control border-dark" readonly></div>
-            <button class="btn btn-outline-success btn-sm w-100 fw-bold" onclick="getLocation()"><i class="bi bi-cursor-fill"></i> ดึงพิกัดปัจจุบัน (GPS)</button>
-          </div>
+          <div class="mb-2"><label class="form-label fw-bold text-success small"><i class="bi bi-geo-alt"></i> พิกัดระบุตารางแผนที่</label><div class="input-group mb-2"><input type="text" id="editLat" class="form-control border-dark" readonly><input type="text" id="editLng" class="form-control border-dark" readonly></div><button class="btn btn-outline-success btn-sm w-100 fw-bold" onclick="getLocation()"><i class="bi bi-cursor-fill"></i> กดจับพิกัดปัจจุบันด้วย GPS โทรศัพท์</button></div>
         </div>
-        <div class="modal-footer bg-light"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button><button type="button" class="btn btn-success px-4" onclick="saveData()"><i class="bi bi-save"></i> บันทึก</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button><button type="button" class="btn btn-success px-4" onclick="saveData()">บันทึกข้อมูล</button></div>
       </div>
     </div>
   </div>
@@ -506,76 +534,48 @@
   <div class="modal fade" id="addHouseModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content border-dark">
-        <div class="modal-header bg-success text-white"><h5 class="modal-title fw-bold"><i class="bi bi-house-add"></i> เพิ่มหลังคาเรือนใหม่</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header bg-success text-white"><h5 class="modal-title fw-bold"><i class="bi bi-house-add"></i> เพิ่มหลังคาเรือนลงทะเบียนใหม่</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body text-dark">
-          <div class="mb-3"><label class="form-label fw-bold small">หมู่ที่ *</label><select id="addHouseMoo" class="form-select border-dark" onchange="updateAddHouseCommunity()"></select></div>
-          <div class="mb-3"><label class="form-label fw-bold small">ชุมชน *</label><select id="addHouseComm" class="form-select border-dark"><option value="">-- รอเลือกหมู่ --</option></select></div>
-          <div class="mb-3"><label class="form-label fw-bold small">บ้านเลขที่ *</label><input type="text" id="addHouseNo" class="form-control border-dark" placeholder="เช่น 123/4"></div>
-          <div class="mb-3"><label class="form-label fw-bold text-success small">รหัสประจำบ้าน 11 หลัก *</label><input type="text" id="addHouseId11" class="form-control border-success font-monospace" placeholder="ตัวเลข 11 หลัก" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
-          <div class="mb-3"><label class="form-label fw-bold small">อสม. ผู้รับผิดชอบ</label><select id="addHouseAsm" class="form-select border-dark"><option value="">-- รอเลือกชุมชน --</option></select></div>
+          <div class="mb-2"><label class="form-label fw-bold small">หมู่ที่ *</label><select id="addHouseMoo" class="form-select border-dark" onchange="updateAddHouseCommunity()"></select></div>
+          <div class="mb-2"><label class="form-label fw-bold small">ชุมชน *</label><select id="addHouseComm" class="form-select border-dark"><option value="">-- รอระบุหมู่ --</option></select></div>
+          <div class="mb-2"><label class="form-label fw-bold small">บ้านเลขที่ *</label><input type="text" id="addHouseNo" class="form-control border-dark" placeholder="ตัวอย่าง 12/3 ม.6"></div>
+          <div class="mb-3"><label class="form-label fw-bold text-success small">รหัสประจำบ้าน 11 หลัก *</label><input type="text" id="addHouseId11" class="form-control border-success font-monospace" placeholder="ระบุตัวเลข 11 หลักหลักทะเบียนราษฎร์" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
+          <div class="mb-2"><label class="form-label fw-bold small">อสม. ผู้รับผิดชอบ</label><select id="addHouseAsm" class="form-select border-dark"><option value="">-- รอเลือกชุมชน --</option></select></div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button><button type="button" class="btn btn-success" onclick="processAddHouse(this)"><i class="bi bi-save"></i> บันทึกข้อมูล</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button><button type="button" class="btn btn-success" onclick="processAddHouse()">ยืนยันบันทึก</button></div>
       </div>
     </div>
   </div>
 
-  <!-- 3. User Account Modal -->
+  <!-- 3. User Accounts Modal -->
   <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content border-dark">
-        <div class="modal-header bg-dark text-white"><h5 class="modal-title fw-bold" id="userModalTitle">จัดการผู้ใช้งาน</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header bg-dark text-white"><h5 class="modal-title fw-bold">จัดการสิทธิ์บัญชีผู้ใช้</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body text-dark">
           <input type="hidden" id="userIdInput">
-          <div class="row mb-3">
-            <div class="col-8"><label class="form-label small fw-bold">ชื่อ-นามสกุล</label><input type="text" id="fullnameInput" class="form-control border-dark"></div>
-            <div class="col-4"><label class="form-label small fw-bold">หมู่ที่</label><select id="mooInput" class="form-select border-dark" onchange="updateUserModalCommunity()"><option value="">- เลือก -</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div>
-          </div>
-          <div class="mb-3"><label class="form-label small fw-bold">ชุมชนที่รับผิดชอบ</label><select id="userInputCommunity" class="form-select border-dark"><option value="">-- เลือกหมู่ก่อน --</option></select></div>
-          <div class="row mb-3">
-            <div class="col-6"><label class="form-label small fw-bold">Username</label><input type="text" id="usernameInput" class="form-control border-dark"></div>
-            <div class="col-6"><label class="form-label small fw-bold">Password</label><input type="password" id="passwordInput" class="form-control border-dark" autocomplete="new-password"></div>
-          </div>
-          <div class="mb-3"><label class="form-label small fw-bold">สิทธิ์การใช้งาน</label><select id="typeInput" class="form-select border-dark"><option value="user">User (อสม.)</option><option value="admin">Admin (ผู้ดูแล)</option></select></div>
+          <div class="row mb-2"><div class="col-8"><label class="form-label small fw-bold">ชื่อ-นามสกุล</label><input type="text" id="fullnameInput" class="form-control border-dark"></div><div class="col-4"><label class="form-label small fw-bold">หมู่</label><select id="mooInput" class="form-select border-dark" onchange="updateUserModalCommunity()"><option value="">-เลือก-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div></div>
+          <div class="mb-2"><label class="form-label small fw-bold">ชุมชนพื้นที่ดูแล</label><select id="userInputCommunity" class="form-select border-dark"><option value="">-- รอเลือกหมู่ --</option></select></div>
+          <div class="row mb-2"><div class="col-6"><label class="form-label small fw-bold">Username</label><input type="text" id="usernameInput" class="form-control border-dark"></div><div class="col-6"><label class="form-label small fw-bold">Password</label><input type="password" id="passwordInput" class="form-control border-dark" autocomplete="new-password"></div></div>
+          <div class="mb-2"><label class="form-label small fw-bold">ระดับสิทธิ์ระบบ</label><select id="typeInput" class="form-select border-dark"><option value="user">User (อสม.ทั่วไป)</option><option value="admin">Admin (ผู้ดูแลระบบกลาง)</option></select></div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button><button type="button" class="btn btn-primary" onclick="processSaveUser()"><i class="bi bi-save"></i> บันทึก</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button><button type="button" class="btn btn-primary" onclick="processSaveUser()">บันทึกข้อมูล</button></div>
       </div>
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- SCRIPTS LOGIC CORE SYSTEMS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwdjCeRcz3jvAKIV2V_2Cf8K7rBrJgrnM9qu6n5KWCQLczwEMZ5DnuxcSpLMegJD5FGXA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxasatuJyNH-_B2L4bR_WxqBX4y7yzKFIfKZmHUFyTdU20VkrfcOR0mBijpNNW1QDGk_w/exec";
     const API_KEY = "Tph-Osm-Gis-SecureKey-2026-XyZ"; 
 
-    // 🌟 ส่งก้อนวัตถุสิทธิ์ผู้ใช้ตัวเต็มไปยัง API หลังบ้าน
-    async function callAPI(action, params = {}) {
-      try {
-        const url = new URL(API_URL);
-        url.searchParams.set("action", action);
-        url.searchParams.set("apiKey", API_KEY);
-        if (currentUser) url.searchParams.set("currentUser", JSON.stringify(currentUser));
-
-        Object.keys(params).forEach(key => {
-          let val = params[key];
-          if (val === undefined || val === null) return;
-          url.searchParams.set(key, typeof val === "object" ? JSON.stringify(val) : val);
-        });
-
-        const response = await fetch(url.toString(), { method: "GET", cache: "no-store" });
-        return await response.json();
-      } catch (error) {
-        console.error("API Error:", error);
-        return { success: false, message: error.message || "API error" };
-      }
-    }
-
     var globalHouseData=[], filteredDataGlobal=[], headers=[], currentPage=1, rowsPerPage=50;
-    var globalOsmList=[], globalLogData=[], filteredLogData=[], logCurrentPage=1, logRowsPerPage=30;
+    var globalOsmList=[], globalLogData=[], rawOsmDashData=[];
     var currentUser=null, editModal=null, userModal=null, addHouseModal=null;
-    var map=null, markersGroup=null, searchMap=null, searchMarker=null, rawOsmDashData=[];
+    var map=null, markersGroup=null, searchMap=null, searchMarker=null;
 
     var communityMap = {
       "1": ["ชุมชนบ้านป่าขาม", "ชุมชนลำปางคูณ"],
@@ -588,19 +588,41 @@
       "8": ["ชุมชนหัวทุ่งสามัคคี"]
     };
 
-    async function loadOsmList() {
-      var res = await callAPI("getOsmList");
-      if (res && res.success) globalOsmList = res.data || [];
+    // 🌟 ฟังก์ชันสลับการย่อขยาย Sidebar (PC Mode)
+    function toggleSidebar() {
+      const sidebar = document.getElementById('mainSidebar');
+      const content = document.getElementById('mainContentWrapper');
+      sidebar.classList.toggle('collapsed');
+      content.classList.toggle('expanded');
+      setTimeout(() => { if(map) map.invalidateSize(); if(searchMap) searchMap.invalidateSize(); }, 300);
     }
 
-    document.addEventListener('DOMContentLoaded', async function() {
+    async function callAPI(action, params = {}) {
+      try {
+        const url = new URL(API_URL);
+        url.searchParams.set("action", action);
+        url.searchParams.set("apiKey", API_KEY);
+        if (currentUser) url.searchParams.set("currentUser", JSON.stringify(currentUser));
+
+        Object.keys(params).forEach(key => {
+          let val = params[key];
+          if (val === undefined || val === null) return;
+          url.searchParams.set(key, typeof val === "object" ? JSON.stringify(val) : val);
+        });
+        const response = await fetch(url.toString(), { method: "GET", cache: "no-store" });
+        return await response.json();
+      } catch (error) {
+        console.error("API Connection Error:", error);
+        return { success: false, message: "การเชื่อมต่อระบบขัดข้องฝั่งเครือข่าย" };
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
       editModal = new bootstrap.Modal(document.getElementById('editModal'));
       userModal = new bootstrap.Modal(document.getElementById('userModal'));
       addHouseModal = new bootstrap.Modal(document.getElementById('addHouseModal'));
       google.charts.load('current', {'packages':['corechart']});
-      loadSystemLogo();
-      loadOsmList();
-
+      
       document.getElementById('editCommunity').addEventListener('change', function() {
         updateAsmDropdown('editAsm', document.getElementById('editMoo').value, this.value, "");
       });
@@ -610,33 +632,41 @@
     });
 
     async function checkLogin() {
-      var u = document.getElementById('loginUser').value;
-      var p = document.getElementById('loginPass').value;
-      if(!u || !p) { alert("กรุณากรอกข้อมูลให้ครบ"); return; }
+      var u = document.getElementById('loginUser').value.trim();
+      var p = document.getElementById('loginPass').value.trim();
+      if(!u || !p) { alert("กรุณากรอก Username และ Password"); return; }
+      
       var res = await callAPI("verifyLogin", { username: u, password: p });
-      if (res.success) {
-        currentUser = res; 
+      if (res && res.success) {
+        currentUser = res;
         document.getElementById('userDisplayName').innerText = res.fullname;
-        document.getElementById('userDisplayMoo').innerText = "หมู่ " + res.moo;
+        document.getElementById('userDisplayMoo').innerText = "หมู่ที่ " + res.moo;
+        
         if(res.type === 'admin') {
-          document.getElementById('adminMenu').style.display = 'block';
-          document.getElementById('bot-manageUser').style.display = 'flex';
-          document.getElementById('adminLogMenu').style.display = 'block';
-          document.getElementById('bot-manageLog').style.display = 'flex';
+          document.getElementById('adminMenu').style.display = 'flex';
+          document.getElementById('adminLogMenu').style.display = 'flex';
         }
-        var loginSec = document.getElementById('loginSection');
-        loginSec.classList.remove('d-flex'); loginSec.classList.add('d-none');
-        document.getElementById('mainContent').style.display = 'block';
-        document.getElementById('bottomNavMenu').style.display = 'flex';
-        showPage('manageData');
+        
+        // 🌟 ปลดล็อกซ่อน/แสดง โครงสร้างหน้าต่างหลักเมื่อล็อกอินผ่านฉลุยเท่านั้น
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('appWrapper').style.display = 'block';
+        
+        showPage('dashboard');
+        await loadOsmList();
         await loadHouseData();
         await loadUsers();
-      } else { document.getElementById('loginError').style.display = 'block'; }
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
     }
 
-    async function loadHouseData(preservePage) {
-      var result = await callAPI("getHouseData");
-      if (result && result.success) setupData(result.data, preservePage);
+    function logout() {
+      currentUser = null;
+      document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = '';
+      document.getElementById('adminMenu').style.display = 'none'; document.getElementById('adminLogMenu').style.display = 'none';
+      document.getElementById('appWrapper').style.display = 'none';
+      document.getElementById('loginSection').style.display = 'flex';
+      document.getElementById('loginError').style.display = 'none';
     }
 
     function togglePassword() {
@@ -645,15 +675,14 @@
       else { passInput.type = "password"; toggleIcon.className = "bi bi-eye-slash"; }
     }
 
-    function logout() {
-      currentUser = null;
-      document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = '';
-      document.getElementById('adminMenu').style.display = 'none'; document.getElementById('bot-manageUser').style.display = 'none';
-      document.getElementById('adminLogMenu').style.display = 'none'; document.getElementById('bot-manageLog').style.display = 'none';
-      document.getElementById('mainContent').style.display = 'none'; document.getElementById('bottomNavMenu').style.display = 'none';
-      var loginSec = document.getElementById('loginSection');
-      loginSec.classList.remove('d-none'); loginSec.classList.add('d-flex');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    async function loadOsmList() {
+      var res = await callAPI("getOsmList");
+      if (res && res.success) globalOsmList = res.data || [];
+    }
+
+    async function loadHouseData(preservePage) {
+      var result = await callAPI("getHouseData");
+      if (result && result.success) setupData(result.data, preservePage);
     }
 
     function setupData(data, preservePage) {
@@ -681,7 +710,7 @@
       document.getElementById('nextBtn').disabled = (currentPage === totalPages || totalRows === 0);
     }
 
-    function changePage(step) { currentPage += step; updateTableAndPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    function changePage(step) { currentPage += step; updateTableAndPagination(); }
     function filterTable() { setupData(globalHouseData, false); }
 
     function renderTableHTML(dataSubset) {
@@ -691,27 +720,25 @@
       dataSubset.forEach(row => {
         var status = (row[c.status] || '').toString().trim();
         var badge = status === 'ยืนยันข้อมูล' ? '<span class="badge bg-success">ยืนยันข้อมูล</span>' : '<span class="badge bg-danger">ยังไม่ยืนยัน</span>';
-        var delBtn = (currentUser && currentUser.type === 'admin') ? `<button class="btn btn-sm btn-danger ms-1" onclick="deleteHouse('${row[c.hcode]}', '${row[c.houseNo]}')"><i class="bi bi-trash"></i> ลบ</button>` : '';
-        tbody.innerHTML += `<tr><td>${row[c.houseNo]}</td><td><span class="font-monospace">${row[c.id11]||'-'}</span></td><td>${row[c.comm]}</td><td>${row[c.asm]}</td><td>${badge}</td><td><button class="btn btn-sm btn-warning fw-bold" onclick="openEditModal('${row[c.hcode]}','${row[c.houseNo]}','${row[c.comm]}','${row[c.asm]}','${status}','${row[c.lat]}','${row[c.lng]}','${row[c.moo]}','${row[c.note]||''}','${row[c.id11]||''}')"><i class="bi bi-pencil-square"></i> แก้ไข</button>${delBtn}</td></tr>`;
+        var delBtn = (currentUser && currentUser.type === 'admin') ? `<button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteHouse('${row[c.hcode]}', '${row[c.houseNo]}')"><i class="bi bi-trash"></i></button>` : '';
+        tbody.innerHTML += `<tr><td><b>${row[c.houseNo]}</b></td><td><span class="font-monospace text-secondary">${row[c.id11]||'-'}</span></td><td>${row[c.comm]}</td><td>${row[c.asm]||'-'}</td><td>${badge}</td><td><button class="btn btn-sm btn-warning fw-bold text-dark" onclick="openEditModal('${row[c.hcode]}','${row[c.houseNo]}','${row[c.comm]}','${row[c.asm]}','${status}','${row[c.lat]}','${row[c.lng]}','${row[c.moo]}','${row[c.note]||''}','${row[c.id11]||''}')"><i class="bi bi-pencil-square"></i> แก้ไข</button>${delBtn}</td></tr>`;
       });
     }
 
     function openEditModal(hcode, houseNo, comm, asm, status, lat, lng, moo, note, houseId11) {
       document.getElementById('editHcode').value = hcode;
       document.getElementById('displayHouseNo').innerText = houseNo;
-      document.getElementById('displayHouseId11').innerText = houseId11 || '-ไม่มีข้อมูล-';
+      document.getElementById('displayHouseId11').innerText = "รหัสประจำบ้าน 11 หลัก: " + (houseId11 || '-');
       document.getElementById('editMoo').value = moo;
-      updateCommunityDropdown(moo, comm);
+      
+      var dropdown = document.getElementById('editCommunity'); dropdown.innerHTML = '<option value="">-- เลือกชุมชน --</option>';
+      (communityMap[moo] || []).forEach(c => { dropdown.innerHTML += `<option value="${c}" ${c===comm?'selected':''}>${c}</option>`; });
+      
       updateAsmDropdown('editAsm', moo, comm, asm);
-      document.getElementById('editStatus').value = (status == 'ยืนยันข้อมูล') ? 'ยืนยันข้อมูล' : 'ยังไม่ยืนยัน';
+      document.getElementById('editStatus').value = status === 'ยืนยันข้อมูล' ? 'ยืนยันข้อมูล' : 'ยังไม่ยืนยัน';
       document.getElementById('editNote').value = note;
       document.getElementById('editLat').value = lat; document.getElementById('editLng').value = lng;
       editModal.show();
-    }
-
-    function updateCommunityDropdown(moo, selectedComm) {
-      var dropdown = document.getElementById('editCommunity'); dropdown.innerHTML = '<option value="">-- เลือกชุมชน --</option>';
-      (communityMap[moo] || []).forEach(c => { dropdown.innerHTML += `<option value="${c}" ${c===selectedComm?'selected':''}>${c}</option>`; });
     }
 
     function updateAsmDropdown(targetId, moo, comm, selectedAsm) {
@@ -721,7 +748,7 @@
 
     async function saveData() {
       var data = { hcode: document.getElementById('editHcode').value, comm: document.getElementById('editCommunity').value, asm: document.getElementById('editAsm').value, status: document.getElementById('editStatus').value, lat: document.getElementById('editLat').value, lng: document.getElementById('editLng').value, note: document.getElementById('editNote').value, userId: currentUser.userId };
-      var res = await callAPI("updateHouseData", data); alert(res.message || "บันทึกเรียบร้อย"); editModal.hide(); await loadHouseData(true);
+      var res = await callAPI("updateHouseData", data); alert(res.message); editModal.hide(); await loadHouseData(true);
     }
 
     function getLocation() {
@@ -730,16 +757,10 @@
       }
     }
 
-    async function deleteHouse(hcode, houseNo) {
-      if(confirm(`ยืนยันการลบข้อมูลบ้านเลขที่ ${houseNo}?`)) {
-        var res = await callAPI("deleteHouseData", { hcode: hcode, userId: currentUser.userId }); alert(res.message); await loadHouseData(true);
-      }
-    }
-
     function openAddHouseModal() {
       var m = document.getElementById('addHouseMoo');
       if (currentUser.type === 'admin') {
-        m.disabled = false; m.innerHTML = '<option value="">-เลือก-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>';
+        m.disabled = false; m.innerHTML = '<option value="">-เลือกหมู่-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>';
       } else { m.disabled = true; m.innerHTML = `<option value="${currentUser.moo}">${currentUser.moo}</option>`; }
       updateAddHouseCommunity(); addHouseModal.show();
     }
@@ -749,12 +770,123 @@
       (communityMap[document.getElementById('addHouseMoo').value] || []).forEach(c => { comm.innerHTML += `<option value="${c}">${c}</option>`; });
     }
 
-    async function processAddHouse(btn) {
+    async function processAddHouse() {
       var moo = document.getElementById('addHouseMoo').value, comm = document.getElementById('addHouseComm').value, hNo = document.getElementById('addHouseNo').value.trim(), id11 = document.getElementById('addHouseId11').value.trim(), asm = document.getElementById('addHouseAsm').value;
-      if (!moo || !comm || !hNo || id11.length !== 11) { alert("กรุณากรอกข้อมูลและรหัสประจำบ้านให้ครบ 11 หลัก!"); return; }
+      if (!moo || !comm || !hNo || id11.length !== 11) { alert("กรุณาระบุรหัสบ้านหลักให้ครบถ้วน 11 หลัก!"); return; }
       
       var res = await callAPI("addNewHouse", { houseNo: hNo, moo: moo, comm: comm, asm: asm, houseId11: id11, userId: currentUser.userId });
       alert(res.message); if(res.success) { addHouseModal.hide(); await loadHouseData(); }
+    }
+
+    async function deleteHouse(hcode, houseNo) {
+      if(confirm(`ยืนยันลบบ้านเลขที่ ${houseNo} ออกจากฐานพิกัดหรือไม่?`)) {
+        var res = await callAPI("deleteHouseData", { hcode: hcode, userId: currentUser.userId }); alert(res.message); await loadHouseData(true);
+      }
+    }
+
+    // 🌟 [ระบบผูกสูตรคำนวณสรุปข้อมูล อสม. แนวนอนเชื่อมข้ามฐานข้อมูลบ้านรายบุคคล]
+    async function loadOsmDashboardData() {
+      var tbody = document.getElementById('osmDashTableBody');
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border text-success spinner-border-sm"></div> กำลังเชื่อมพิกัดประมวลผลความรับผิดชอบ...</td></tr>';
+      
+      var res = await callAPI("getOsmDashboardData");
+      if (res && res.success && res.data.length > 1) {
+        rawOsmDashData = res.data.slice(1);
+        
+        var commFilter = document.getElementById('dashCommunityFilter'), uComm = new Set();
+        rawOsmDashData.forEach(r => { if(r[9]) uComm.add(r[9].toString().trim()); });
+        commFilter.innerHTML = '<option value="">-- แสดงผลรวมสมาชิก อสม. ทุกชุมชน --</option>';
+        Array.from(uComm).sort().forEach(c => { commFilter.innerHTML += `<option value="${c}">${c}</option>`; });
+        
+        renderOsmDashboardTable(rawOsmDashData, res.data[0]);
+      }
+    }
+
+    function renderOsmDashboardTable(rows, headersData) {
+      var tbody = document.getElementById('osmDashTableBody'); tbody.innerHTML = '';
+      var idx = { name: headersData.indexOf("ชื่อ"), idCard: headersData.indexOf("ID"), moo: headersData.indexOf("หมู่-หมู่บ้าน"), phone: headersData.indexOf("หมายเลขโทรศัพท์"), addr: headersData.indexOf("ที่อยู่"), img: headersData.indexOf("ลิงก์รูปภาพ"), email: headersData.indexOf("Email"), line: headersData.indexOf("Line ID"), comm: headersData.indexOf("community"), hn: headersData.indexOf("HN") };
+      
+      // ดึงคอลัมน์จากชีทบ้านหลัก
+      var houseAsmCol = headers.indexOf('อสม');
+      var houseNoCol = headers.indexOf('บ้านเลขที่');
+
+      let listCount = 1;
+      rows.forEach(r => {
+        var osmName = (r[idx.name] || '').toString().trim();
+        var img = r[idx.img] || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+        
+        // 🌟 ประมวลหาหลังคาเรือนที่ดูแลร่วมกับชีทหลังคาเรือนหลักแบบไดนามิก[cite: 2]
+        var houseList = [];
+        if (globalHouseData.length > 1 && houseAsmCol > -1) {
+          globalHouseData.slice(1).forEach(hRow => {
+            if ((hRow[houseAsmCol] || '').toString().trim() === osmName) {
+              houseList.push((hRow[houseNoCol] || '').toString().trim());
+            }
+          });
+        }
+        var countHouses = houseList.length;
+        var housesString = houseList.length > 0 ? houseList.join(", ") : "- ยังไม่มีการมอบหมายบ้าน -";
+
+        tbody.innerHTML += `
+          <tr>
+            <td class="text-center fw-bold">${listCount++}</td>
+            <td class="text-center"><img src="${img}" class="rounded border shadow-sm" style="width:48px; height:48px; object-fit:cover;"></td>
+            <td><b>${osmName}</b></td>
+            <td>
+              <div class="small text-dark">
+                <b>ID:</b> ${r[idx.idCard] || '-'}<br>
+                <b>ที่อยู่:</b> ${r[idx.addr] || '-'}<br>
+                <b>โทร:</b> ${r[idx.phone] || '-'} | <b>Line:</b> ${r[idx.line] || '-'}<br>
+                <b>Email:</b> ${r[idx.email] || '-'}
+              </div>
+            </td>
+            <td class="text-center fw-bold fs-5 text-success">${countHouses}</td>
+            <td class="text-wrap text-muted small" style="line-height:1.4;">${housesString}</td>
+          </tr>`;
+      });
+      document.getElementById('dashOsmCount').innerText = rows.length;
+    }
+
+    function filterOsmDashboard() {
+      var filterVal = document.getElementById('dashCommunityFilter').value;
+      var filtered = filterVal === "" ? rawOsmDashData : rawOsmDashData.filter(r => r[9] === filterVal);
+      renderOsmDashboardTable(filtered, ["ลำดับ","ชื่อ","ID","หมู่-หมู่บ้าน","หมายเลขโทรศัพท์","ที่อยู่","ลิงก์รูปภาพ","Email","Line ID","community","HN"]);
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active-section'));
+      var target = document.getElementById(pageId); if(target) target.classList.add('active-section');
+      
+      document.querySelectorAll('.sidebar-menu .nav-link, .bottom-nav .nav-link').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll(`[onclick="showPage('${pageId}')"]`).forEach(m => m.classList.add('active'));
+      
+      if(pageId === 'dashboard') { setTimeout(() => { if(!map){ map=L.map('map').setView([18.17, 99.39],13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); markersGroup=L.layerGroup().addTo(map); } map.invalidateSize(); loadMapMarkers(); drawDashboard([headers].concat(filteredDataGlobal)); }, 300); }
+      if(pageId === 'searchHouse') { setTimeout(() => { if(!searchMap) { searchMap = L.map('searchMapArea').setView([18.17, 99.39], 13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(searchMap); } searchMap.invalidateSize(); }, 300); }
+      if(pageId === 'osmProfile') { setTimeout(() => loadOsmProfileData(), 200); }
+      if(pageId === 'osmDashboard') { setTimeout(() => loadOsmDashboardData(), 200); }
+      if(pageId === 'manageLog') { setTimeout(() => loadAuditLog(), 200); }
+    }
+
+    async function loadOsmProfileData() {
+      var res = await callAPI("getOsmProfile");
+      if (res && res.success) {
+        var p = res.data;
+        document.getElementById('profilePreview').src = p.imgUrl;
+        document.getElementById('profileNameDisplay').innerText = p.name || "-";
+        document.getElementById('profileCommDisplay').innerText = p.community || "ไม่ระบุพื้นที่";
+        document.getElementById('profileIdCardDisplay').innerText = p.idCard || "-";
+        document.getElementById('profileHnDisplay').innerText = p.hn || "-";
+        document.getElementById('profilePhone').value = p.phone || "";
+        document.getElementById('profileLineId').value = p.lineId || "";
+        document.getElementById('profileEmail').value = p.email || "";
+        document.getElementById('profileAddress').value = p.address || "";
+        document.getElementById('profileImgUrl').value = p.imgUrl || "";
+      }
+    }
+
+    async function saveOsmProfile() {
+      var payload = { phone: document.getElementById('profilePhone').value, lineId: document.getElementById('profileLineId').value, email: document.getElementById('profileEmail').value, address: document.getElementById('profileAddress').value, imgUrl: document.getElementById('profileImgUrl').value };
+      var res = await callAPI("updateOsmProfile", payload); alert(res.message); loadOsmProfileData();
     }
 
     function drawDashboard(data) {
@@ -771,95 +903,22 @@
       var tb = document.getElementById('summaryTableBody'); tb.innerHTML = '';
       Object.keys(s).sort().forEach(k => {
         let item = s[k], pct = ((item.done/item.total)*100).toFixed(1);
-        tb.innerHTML += `<tr><td class="text-center fw-bold">${item.moo}</td><td>${item.comm}</td><td class="text-center">${item.total}</td><td class="text-center text-success fw-bold">${item.done}</td><td class="text-center text-danger fw-bold">${item.total-item.done}</td><td><div class="d-flex align-items-center"><span class="me-2 small fw-bold">${pct}%</span><div class="progress flex-grow-1" style="height:12px;"><div class="progress-bar bg-success" style="width:${pct}%;"></div></div></div></td></tr>`;
+        tb.innerHTML += `<tr><td class="text-center fw-bold">${item.moo}</td><td>${item.comm}</td><td class="text-center">${item.total}</td><td class="text-center text-success fw-bold">${item.done}</td><td class="text-center text-danger fw-bold">${item.total-item.done}</td><td><div class="d-flex align-items-center"><span class="me-2 small fw-bold">${pct}%</span><div class="progress flex-grow-1" style="height:10px;"><div class="progress-bar bg-success" style="width:${pct}%;"></div></div></div></td></tr>`;
       });
-    }
-
-    function initMap() {
-      if(!map) {
-        map = L.map('map').setView([19.9, 99.8], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        markersGroup = L.layerGroup().addTo(map);
-      }
     }
 
     function loadMapMarkers() {
       if(!markersGroup) return; markersGroup.clearLayers();
-      var c = { lat: headers.indexOf('ละติจูด'), lng: headers.indexOf('ลองจิจูด'), hNo: headers.indexOf('บ้านเลขที่'), asm: headers.indexOf('อสม'), status: headers.indexOf('สถานะการดูแล'), moo: headers.indexOf('หมู่ที่'), comm: headers.indexOf('ชุมชนบ้าน'), id11: headers.indexOf('รหัสประจำบ้าน 11 หลัก') };
+      var c = { lat: headers.indexOf('ละติจูด'), lng: headers.indexOf('ลองจิจูด'), hNo: headers.indexOf('บ้านเลขที่'), status: headers.indexOf('สถานะการดูแล'), moo: headers.indexOf('หมู่ที่') };
       var bounds = [];
       globalHouseData.slice(1).filter(r => currentUser.type==='admin' || r[c.moo]==currentUser.moo).forEach(r => {
         let lt = parseFloat(r[c.lat]), ln = parseFloat(r[c.lng]); if(!lt || !ln) return;
         let color = r[c.status]==='ยืนยันข้อมูล' ? '#0f5132' : '#dc3545';
-        L.circleMarker([lt, ln], {radius:7, color:'#fff', fillColor:color, fillOpacity:0.8}).addTo(markersGroup)
-          .bindPopup(`<b>บ้านเลขที่:</b> ${r[c.hNo]}<br><b>หมู่:</b> ${r[c.moo]}<br><b>ชุมชน:</b> ${r[c.comm]}<br><b>สถานะ:</b> ${r[c.status]}`);
+        L.circleMarker([lt, ln], {radius:6, color:'#fff', fillColor:color, fillOpacity:0.85}).addTo(markersGroup)
+          .bindPopup(`<b>บ้านเลขที่:</b> ${r[c.hNo]}<br><b>สถานะ:</b> ${r[c.status]}`);
         bounds.push([lt, ln]);
       });
       if(bounds.length > 0) map.fitBounds(bounds);
-    }
-
-    function showPage(pageId) {
-      document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active-section'));
-      var target = document.getElementById(pageId); if(target) target.classList.add('active-section');
-      document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-      document.querySelectorAll(`[onclick="showPage('${pageId}')"]`).forEach(m => m.classList.add('active'));
-      
-      if(pageId === 'dashboard') { setTimeout(() => { initMap(); if(map) map.invalidateSize(); loadMapMarkers(); drawDashboard([headers].concat(filteredDataGlobal)); }, 350); }
-      if(pageId === 'searchHouse') { setTimeout(() => { if(!searchMap) { searchMap = L.map('searchMapArea').setView([19.9, 99.8], 13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(searchMap); } searchMap.invalidateSize(); }, 350); }
-      if(pageId === 'manageLog') { setTimeout(() => loadAuditLog(), 350); }
-      if(pageId === 'osmProfile') { setTimeout(() => loadOsmProfileData(), 300); }
-      if(pageId === 'osmDashboard') { setTimeout(() => loadOsmDashboardData(), 300); }
-    }
-
-    // 🌟 หน้าประวัติเรียกข้อมูลโปรไฟล์ผ่าน API ตัวเต็ม
-    async function loadOsmProfileData() {
-      var res = await callAPI("getOsmProfile");
-      if (res && res.success) {
-        var p = res.data;
-        document.getElementById('profilePreview').src = p.imgUrl;
-        document.getElementById('profileNameDisplay').innerText = p.name || "-";
-        document.getElementById('profileCommDisplay').innerText = p.community || "ไม่ระบุ";
-        document.getElementById('profileIdCardDisplay').innerText = p.idCard || "-";
-        document.getElementById('profileHnDisplay').innerText = p.hn || "-";
-        document.getElementById('profilePhone').value = p.phone || "";
-        document.getElementById('profileLineId').value = p.lineId || "";
-        document.getElementById('profileEmail').value = p.email || "";
-        document.getElementById('profileAddress').value = p.address || "";
-        document.getElementById('profileImgUrl').value = p.imgUrl || "";
-      } else { alert(res.message || "ไม่สามารถเรียกดูข้อมูลโปรไฟล์อ้างอิงได้"); }
-    }
-
-    async function saveOsmProfile() {
-      var payload = { phone: document.getElementById('profilePhone').value, lineId: document.getElementById('profileLineId').value, email: document.getElementById('profileEmail').value, address: document.getElementById('profileAddress').value, imgUrl: document.getElementById('profileImgUrl').value };
-      var res = await callAPI("updateOsmProfile", payload); alert(res.message); await loadOsmProfileData();
-    }
-
-    async function loadOsmDashboardData() {
-      var res = await callAPI("getOsmDashboardData");
-      if (res && res.success && res.data.length > 1) {
-        rawOsmDashData = res.data.slice(1);
-        var commFilter = document.getElementById('dashCommunityFilter'), uComm = new Set();
-        rawOsmDashData.forEach(r => { if(r[9]) uComm.add(r[9].toString().trim()); });
-        commFilter.innerHTML = '<option value="">-- แสดงผลทุกชุมชนในระบบ --</option>';
-        Array.from(uComm).sort().forEach(c => { commFilter.innerHTML += `<option value="${c}">${c}</option>`; });
-        renderOsmDashboardTable(rawOsmDashData, res.data[0]);
-      }
-    }
-
-    function renderOsmDashboardTable(rows, headersData) {
-      var tbody = document.getElementById('osmDashTableBody'); tbody.innerHTML = '';
-      var idx = { name: headersData.indexOf("ชื่อ"), moo: headersData.indexOf("หมู่-หมู่บ้าน"), phone: headersData.indexOf("หมายเลขโทรศัพท์"), img: headersData.indexOf("ลิงก์รูปภาพ"), line: headersData.indexOf("Line ID"), comm: headersData.indexOf("community"), hn: headersData.indexOf("HN") };
-      
-      rows.forEach(r => {
-        var img = r[idx.img] || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-        tbody.innerHTML += `<tr><td class="text-center"><img src="${img}" class="rounded-circle border border-secondary shadow-sm" style="width:42px; height:42px; object-fit:cover;"></td><td><b>${r[idx.name]}</b></td><td class="text-center">ม.${r[idx.moo]}</td><td><i class="bi bi-geo-alt text-danger me-1"></i>${r[idx.comm]}</td><td class="text-center font-monospace">${r[idx.phone]||'-'}</td><td class="text-center">${r[idx.line]||'-'}</td><td class="text-center font-monospace text-secondary">${r[idx.hn]||'-'}</td></tr>`;
-      });
-      document.getElementById('dashOsmCount').innerText = rows.length;
-    }
-
-    function filterOsmDashboard() {
-      var filterVal = document.getElementById('dashCommunityFilter').value;
-      var filtered = filterVal === "" ? rawOsmDashData : rawOsmDashData.filter(r => r[9] === filterVal);
-      renderOsmDashboardTable(filtered, ["ลำดับ","ชื่อ","ID","หมู่-หมู่บ้าน","หมายเลขโทรศัพท์","ที่อยู่","ลิงก์รูปภาพ","Email","Line ID","community","HN"]);
     }
 
     async function loadUsers() {
@@ -868,14 +927,9 @@
         var tb = document.getElementById('userTableBody'); tb.innerHTML = '';
         for(let i=1; i<res.data.length; i++) {
           let r = res.data[i];
-          tb.innerHTML += `<tr><td>${r[0]}</td><td><b>${r[5]}</b> (ม.${r[6]})</td><td>${r[4]||'-'}</td><td><span class="badge ${r[3]==='admin'?'bg-danger':'bg-primary'}">${r[3]}</span></td><td class="text-center"><button class="btn btn-sm btn-outline-warning text-dark fw-bold" onclick="editUser('${r[0]}','${r[1]}','${r[3]}','${r[4]}','${r[5]}','${r[6]}')"><i class="bi bi-pencil"></i></button></td></tr>`;
+          tb.innerHTML += `<tr><td>${r[0]}</td><td><b>${r[5]}</b> (ม.${r[6]})</td><td>${r[4]||'-'}</td><td><span class="badge ${r[3]==='admin'?'bg-danger':'bg-primary'}">${r[3]}</span></td><td class="text-center"><button class="btn btn-sm btn-outline-warning text-dark font-medium" onclick="editUser('${r[0]}','${r[1]}','${r[3]}','${r[4]}','${r[5]}','${r[6]}')"><i class="bi bi-pencil"></i></button></td></tr>`;
         }
       }
-    }
-
-    function updateUserModalCommunity(selectedComm) {
-      var d = document.getElementById('userInputCommunity'); d.innerHTML = '<option value="">-- เลือกชุมชน --</option>';
-      (communityMap[document.getElementById('mooInput').value] || []).forEach(c => { d.innerHTML += `<option value="${c}" ${c===selectedComm?'selected':''}>${c}</option>`; });
     }
 
     function openUserModal() {
@@ -883,6 +937,11 @@
       document.getElementById('mooInput').value = ''; updateUserModalCommunity();
       document.getElementById('usernameInput').value = ''; document.getElementById('passwordInput').value = '';
       userModal.show();
+    }
+
+    function updateUserModalCommunity(selectedComm) {
+      var d = document.getElementById('userInputCommunity'); d.innerHTML = '<option value="">-- เลือกชุมชน --</option>';
+      (communityMap[document.getElementById('mooInput').value] || []).forEach(c => { d.innerHTML += `<option value="${c}" ${c===selectedComm?'selected':''}>${c}</option>`; });
     }
 
     function editUser(id, user, type, comm, name, moo) {
@@ -894,43 +953,38 @@
 
     async function processSaveUser() {
       var data = { id: document.getElementById('userIdInput').value, fullname: document.getElementById('fullnameInput').value, moo: document.getElementById('mooInput').value, comm: document.getElementById('userInputCommunity').value, user: document.getElementById('usernameInput').value, pass: document.getElementById('passwordInput').value, type: document.getElementById('typeInput').value, userId: currentUser.userId };
-      var res = await callAPI("saveUserData", data); alert(res.message); userModal.hide(); await loadUsers();
+      var res = await callAPI("saveUserData", data); alert(res.message); userModal.hide(); loadUsers();
     }
 
-    async function loadSystemLogo() {
-      var res = await callAPI("getSystemSettings");
-      if(res && res.success && res.data.logoUrl) {
-        document.getElementById('loginLogo').src = res.data.logoUrl;
-        var nl = document.getElementById('navLogo'); nl.src = res.data.logoUrl; nl.style.display = 'inline-block';
-        document.getElementById('settingLogoUrl').value = res.data.logoUrl;
+    async function loadAuditLog() {
+      var res = await callAPI("getAuditLog");
+      if (res && res.success && res.data.length > 1) {
+        globalLogData = res.data.slice(1).reverse();
+        var tb = document.getElementById('logTableBody'); tb.innerHTML = '';
+        globalLogData.forEach(r => {
+          tb.innerHTML += `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td><span class="badge bg-secondary">${r[2]}</span></td><td><code>${r[4]}</code></td><td>${r[5]}</td><td>${r[6]}</td><td class="small">${r[7]}</td></tr>`;
+        });
       }
-    }
-
-    async function saveLogo(btn) {
-      var res = await callAPI("saveSystemSettings", { logoUrl: document.getElementById('settingLogoUrl').value.trim(), userId: currentUser.userId });
-      alert(res.message); await loadSystemLogo();
     }
 
     function updateSearchCommunity() {
       var comm = document.getElementById('searchComm'); comm.innerHTML = '<option value="">-- เลือกชุมชน --</option>';
       (communityMap[document.getElementById('searchMoo').value] || []).forEach(c => { comm.innerHTML += `<option value="${c}">${c}</option>`; });
     }
-
     function updateSearchHouse() {
       var hs = document.getElementById('searchHouseSelect'); hs.innerHTML = '<option value="">-- เลือกบ้านเลขที่ --</option>';
       globalHouseData.slice(1).filter(r => r[headers.indexOf('หมู่ที่')]==document.getElementById('searchMoo').value && r[headers.indexOf('ชุมชนบ้าน')]==document.getElementById('searchComm').value)
         .forEach(r => { hs.innerHTML += `<option value="${r[headers.indexOf('บ้านเลขที่')]}">${r[headers.indexOf('บ้านเลขที่')]}</option>`; });
     }
-
     function locateHouseOnMap() {
       var m = document.getElementById('searchMoo').value, c = document.getElementById('searchComm').value, h = document.getElementById('searchHouseSelect').value;
       var match = globalHouseData.slice(1).find(r => r[headers.indexOf('หมู่ที่')]==m && r[headers.indexOf('ชุมชนบ้าน')]==c && r[headers.indexOf('บ้านเลขที่')]==h);
       if(match) {
         var lt = parseFloat(match[headers.indexOf('ละติจูด')]), ln = parseFloat(match[headers.indexOf('ลองจิจูด')]);
-        if(!lt || !ln) { alert("บ้านหลังนี้ยังไม่มีพิกัดครับ"); return; }
+        if(!lt || !ln) { alert("ยังไม่ได้ปักหมุดพิกัดละติจูด/ลองจิจูด"); return; }
         searchMap.setView([lt, ln], 18);
         if(searchMarker) searchMap.removeLayer(searchMarker);
-        searchMarker = L.circleMarker([lt, ln], {radius:10, color:'#fff', fillColor:'#0a58ca', fillOpacity:0.9}).addTo(searchMap).bindPopup(`<b>บ้านเลขที่:</b> ${h}`).openPopup();
+        searchMarker = L.circleMarker([lt, ln], {radius:9, color:'#fff', fillColor:'#0d6efd', fillOpacity:0.9}).addTo(searchMap).bindPopup(`<b>บ้านเลขที่:</b> ${h}`).openPopup();
       }
     }
 
@@ -941,49 +995,16 @@
       generateReport();
     }
     function updateReportFiltersComm() { generateReport(); }
-    
     function generateReport() {
       var m = document.getElementById('reportMoo').value, c = document.getElementById('reportComm').value;
-      if(!m) { document.getElementById('reportTableBody').innerHTML = '<tr><td colspan="5" class="text-center py-4">กรุณาเลือกหมู่</td></tr>'; return; }
+      if(!m) { document.getElementById('reportTableBody').innerHTML = '<tr><td colspan="5" class="text-center py-4">กรุณาระบุหมู่ข้อมูล</td></tr>'; return; }
       reportFilteredData = globalHouseData.slice(1).filter(r => r[headers.indexOf('หมู่ที่')]==m && (!c || r[headers.indexOf('ชุมชนบ้าน')]==c));
-      document.getElementById('reportHeader').innerText = `หมู่ที่ ${m} ${c?'('+c+')':''}`;
-      reportCurrentPage = 1; renderReportPage();
-    }
-
-    function renderReportPage() {
+      document.getElementById('reportHeader').innerText = `พื้นที่ หมู่ที่ ${m} ${c?' ชุมชน'+c:''}`;
       var tb = document.getElementById('reportTableBody'); tb.innerHTML = '';
-      var sub = reportFilteredData.slice((reportCurrentPage-1)*reportRowsPerPage, reportCurrentPage*reportRowsPerPage);
-      var c = { hNo: headers.indexOf('บ้านเลขที่'), id11: headers.indexOf('รหัสประจำบ้าน 11 หลัก'), asm: headers.indexOf('อสม'), status: headers.indexOf('สถานะการดูแล') };
-      
-      let count = (reportCurrentPage-1)*reportRowsPerPage + 1;
-      sub.forEach(r => {
-        tb.innerHTML += `<tr><td class="text-center">${count++}</td><td class="text-center fw-bold">${r[c.hNo]}</td><td class="text-center font-monospace">${r[c.id11]||'-'}</td><td>${r[c.asm]||'-'}</td><td class="text-center">${r[c.status]}</td></tr>`;
+      let count = 1;
+      reportFilteredData.forEach(r => {
+        tb.innerHTML += `<tr><td class="text-center">${count++}</td><td class="text-center fw-bold">${r[headers.indexOf('บ้านเลขที่')]}</td><td class="text-center font-monospace text-secondary">${r[headers.indexOf('รหัสประจำบ้าน 11 หลัก')]||'-'}</td><td>${r[headers.indexOf('อสม')]||'-'}</td><td class="text-center">${r[headers.indexOf('สถานะการดูแล')]}</td></tr>`;
       });
-      var totalPages = Math.ceil(reportFilteredData.length / reportRowsPerPage) || 1;
-      document.getElementById('reportCurrentPageDisplay').innerText = reportCurrentPage;
-      document.getElementById('reportTotalPageDisplay').innerText = totalPages;
-    }
-    function changeReportPage(step) { reportCurrentPage += step; renderReportPage(); }
-
-    async function loadAuditLog() {
-      var res = await callAPI("getAuditLog");
-      if (res && res.success && res.data.length > 1) {
-        globalLogData = res.data.slice(1).reverse(); filteredLogData = [...globalLogData];
-        logCurrentPage = 1; updateLogTableAndPagination();
-      }
-    }
-
-    function updateLogTableAndPagination() {
-      var tb = document.getElementById('logTableBody'); tb.innerHTML = '';
-      var sub = filteredLogData.slice((logCurrentPage-1)*logRowsPerPage, logCurrentPage*logRowsPerPage);
-      sub.forEach(r => {
-        tb.innerHTML += `<tr><td>${r[0]}</td><td><b>${r[1]}</b> <span class="badge bg-dark">${r[2]}</span></td><td><span class="badge bg-secondary">${r[3]}</span></td><td><code>${r[4]}</code></td><td>${r[5]}</td><td>${r[6]}</td><td class="small text-wrap">${r[7]}</td></tr>`;
-      });
-    }
-    function filterLogTable() {
-      var v = document.getElementById('logSearchInput').value.toLowerCase().trim();
-      filteredLogData = globalLogData.filter(r => !v || r[1].toLowerCase().indexOf(v)!==-1 || r[7].toLowerCase().indexOf(v)!==-1);
-      updateLogTableAndPagination();
     }
   </script>
 </body>
