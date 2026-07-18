@@ -9,14 +9,63 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
+    /* ====================================================================
+       🎨 ชุดสีหลักของระบบ — โทนสดใส ตัดกันชัดเจน เหมาะกับผู้สูงอายุ
+       ==================================================================== */
+    :root {
+      --brand-green: #0e9f6e;      /* เขียวสดใส อ่านง่ายกว่าสีเขียวเข้มแบบเดิม */
+      --brand-green-dark: #0a7a54;
+      --brand-green-darker: #075e40;
+      --brand-blue: #2563eb;
+      --brand-amber: #f59e0b;
+      --brand-red: #e11d48;
+      --text-dark: #1a1a1a;
+      --bg-soft: #f0f7f4;          /* พื้นหลังพาสเทลเขียวอ่อน สบายตา */
+    }
+
+    html { font-size: 17px; } /* 🌟 ขยายฟอนต์พื้นฐานทั้งระบบให้ผู้สูงอายุอ่านง่ายขึ้น */
+
     body {
       font-family: 'Sarabun', sans-serif;
-      background-color: #f4f6f9;
-      color: #111111;
+      background-color: var(--bg-soft);
+      color: var(--text-dark);
       margin: 0;
       padding: 0;
       overflow-x: hidden;
+      font-size: 1rem;
     }
+
+    h3 { font-size: 1.5rem; }
+    h4 { font-size: 1.3rem; }
+    h5 { font-size: 1.15rem; }
+    label, .form-label { font-size: 1rem !important; }
+
+    /* 🌟 ปุ่มและช่องกรอกข้อมูลขนาดใหญ่ขึ้น เพื่อให้กดง่าย เหมาะกับผู้สูงอายุ/มือถือ */
+    .btn {
+      font-size: 1rem;
+      padding: 0.55rem 1.1rem;
+      min-height: 44px;
+      border-radius: 8px;
+    }
+    .btn-sm { min-height: 36px; padding: 0.35rem 0.7rem; font-size: 0.9rem; }
+    .form-control, .form-select {
+      font-size: 1.05rem;
+      padding: 0.6rem 0.8rem;
+      min-height: 46px;
+      border-width: 1.5px;
+    }
+    /* 🌟 ให้เห็นจุดโฟกัสชัดเจนเวลากดคีย์บอร์ด/แตะหน้าจอ (accessibility) */
+    .btn:focus-visible, .form-control:focus, .form-select:focus, a:focus-visible {
+      outline: 3px solid var(--brand-blue) !important;
+      outline-offset: 1px;
+    }
+
+    .btn-success { background-color: var(--brand-green) !important; border-color: var(--brand-green) !important; }
+    .btn-success:hover { background-color: var(--brand-green-dark) !important; border-color: var(--brand-green-dark) !important; }
+    .btn-outline-success { color: var(--brand-green-dark) !important; border-color: var(--brand-green) !important; }
+    .text-success { color: var(--brand-green-dark) !important; }
+    .badge.bg-success { background-color: var(--brand-green) !important; font-size: 0.95rem; padding: 0.5em 0.8em; }
+    .badge.bg-danger { background-color: var(--brand-red) !important; font-size: 0.95rem; padding: 0.5em 0.8em; }
 
     /* 🔐 หน้าจอ Login เต็มหน้าจอ ซ่อนองค์ประกอบอื่น */
     #loginSection {
@@ -26,7 +75,7 @@
       top: 0;
       left: 0;
       z-index: 2000;
-      background-color: #1a1c1e;
+      background: linear-gradient(160deg, var(--brand-green-darker), var(--brand-green-dark) 60%, var(--brand-green));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -39,8 +88,8 @@
       bottom: 0;
       left: 0;
       width: 260px;
-      background-color: #111111;
-      border-right: 3px solid #0f5132;
+      background-color: var(--brand-green-darker); /* 🌟 เปลี่ยนจากดำล้วนเป็นเขียวเข้มสดใส ดูเป็นมิตรกว่าเดิม */
+      border-right: 3px solid var(--brand-green);
       z-index: 1040;
       transition: all 0.3s ease;
       display: flex;
@@ -51,7 +100,7 @@
     }
     .sidebar-header {
       padding: 15px;
-      background-color: #0f5132;
+      background-color: var(--brand-green-dark);
       color: white;
       display: flex;
       align-items: center;
@@ -65,25 +114,25 @@
       overflow-y: auto;
     }
     .sidebar-menu .nav-link {
-      color: #cfd2d6;
-      padding: 12px 20px;
+      color: #eafff5;
+      padding: 14px 20px;
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 0.95rem;
+      font-size: 1.02rem;
       border-left: 4px solid transparent;
       text-decoration: none;
       white-space: nowrap;
     }
     .sidebar-menu .nav-link:hover {
-      background-color: #1c1f22;
+      background-color: rgba(255,255,255,0.12);
       color: white;
     }
     .sidebar-menu .nav-link.active {
-      background-color: #0f5132;
+      background-color: var(--brand-green);
       color: white;
-      border-left-color: #198754;
-      font-weight: 600;
+      border-left-color: #ffffff;
+      font-weight: 700;
     }
     .sidebar.collapsed .nav-link span {
       display: none;
@@ -118,9 +167,9 @@
 
     /* 📱 การจัดการเมนูสำหรับ Smart Phone */
     .mobile-header {
-      background-color: #0f5132;
+      background-color: var(--brand-green-dark);
       color: white;
-      height: 55px;
+      height: 58px;
       display: none;
       align-items: center;
       padding: 0 15px;
@@ -134,52 +183,65 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 65px;
-      background-color: #111111;
+      height: 70px;
+      background-color: var(--brand-green-darker); /* 🌟 เปลี่ยนจากดำล้วนเป็นเขียวเข้ม ให้ดูสดใสเป็นมิตรมากขึ้น */
       display: none;
       justify-content: space-around;
       align-items: center;
       z-index: 1050;
-      border-top: 2px solid #0f5132;
+      border-top: 2px solid var(--brand-green);
       padding-bottom: env(safe-area-inset-bottom);
     }
     .bottom-nav .nav-link {
-      color: #b2b2b2;
+      color: #cdeee0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      font-size: 0.65rem;
+      justify-content: center;
+      font-size: 0.72rem;
       text-decoration: none;
       flex: 1;
+      height: 100%;
+      gap: 2px;
     }
-    .bottom-nav .nav-link i { font-size: 1.2rem; }
+    .bottom-nav .nav-link i { font-size: 1.35rem; }
     .bottom-nav .nav-link.active {
       color: #ffffff;
-      background-color: #0f5132;
+      background-color: var(--brand-green);
       font-weight: bold;
     }
 
     /* High Contrast Style */
     .table th {
-      background-color: #0f5132 !important;
+      background-color: var(--brand-green-dark) !important;
       color: white !important;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 1rem;
+      vertical-align: middle;
+      padding: 0.75rem 0.6rem;
+    }
+    .table td {
+      padding: 0.7rem 0.6rem;
+      font-size: 1rem;
       vertical-align: middle;
     }
     .card-header {
-      background-color: #146c43 !important;
+      background-color: var(--brand-green-dark) !important;
       color: white !important;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 1.05rem;
     }
     .page-section { display: none !important; }
     .active-section { display: block !important; }
 
     @media (max-width: 768px) {
+      html { font-size: 16px; }
       .sidebar { display: none !important; }
-      .content-wrapper { margin-left: 0 !important; padding-top: 55px; padding-bottom: 70px; }
+      .content-wrapper { margin-left: 0 !important; padding-top: 58px; padding-bottom: 76px; }
       .top-bar { display: none !important; }
       .mobile-header { display: flex !important; }
       .bottom-nav { display: flex !important; }
+      .table th, .table td { font-size: 0.92rem; padding: 0.55rem 0.4rem; }
     }
 
     /* ====================================================================
@@ -569,7 +631,7 @@
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxasatuJyNH-_B2L4bR_WxqBX4y7yzKFIfKZmHUFyTdU20VkrfcOR0mBijpNNW1QDGk_w/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwuOX9ypCeS-DsvFfqSPIcSiySB_JHAroHRLm8hhUSER2p0K5vIMlRyu2rNtNVihHezNg/exec";
     const API_KEY = "Tph-Osm-Gis-SecureKey-2026-XyZ"; 
 
     var globalHouseData=[], filteredDataGlobal=[], headers=[], currentPage=1, rowsPerPage=50;
@@ -769,11 +831,27 @@
     }
 
     async function processAddHouse() {
+      var btn = event.target;
       var moo = document.getElementById('addHouseMoo').value, comm = document.getElementById('addHouseComm').value, hNo = document.getElementById('addHouseNo').value.trim(), id11 = document.getElementById('addHouseId11').value.trim(), asm = document.getElementById('addHouseAsm').value;
       if (!moo || !comm || !hNo || id11.length !== 11) { alert("กรุณาระบุรหัสบ้านหลักให้ครบถ้วน 11 หลัก!"); return; }
-      
+
+      btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังตรวจสอบข้อมูลซ้ำ...';
+
+      // 🌟 ตรวจสอบก่อนว่ามีหลังคาเรือนนี้อยู่แล้วหรือไม่ (กันข้อมูลซ้ำ)
+      var dupRes = await callAPI("checkHouseDuplicate", { moo: moo, comm: comm, houseNo: hNo, houseId11: id11 });
+      if (!dupRes || !dupRes.success) {
+        alert((dupRes && dupRes.message) || "ไม่สามารถตรวจสอบข้อมูลซ้ำได้ กรุณาลองใหม่");
+        btn.disabled = false; btn.innerHTML = 'ยืนยันบันทึก'; return;
+      }
+      if (dupRes.exists) {
+        alert(dupRes.message || "⚠️ พบข้อมูลหลังคาเรือนนี้อยู่ในระบบแล้ว ไม่สามารถเพิ่มซ้ำได้");
+        btn.disabled = false; btn.innerHTML = 'ยืนยันบันทึก'; return;
+      }
+
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...';
       var res = await callAPI("addNewHouse", { houseNo: hNo, moo: moo, comm: comm, asm: asm, houseId11: id11, userId: currentUser.userId });
-      alert(res.message); if(res.success) { addHouseModal.hide(); await loadHouseData(); }
+      alert(res.message); if(res.success) { addHouseModal.hide(); document.getElementById('addHouseId11').value = ''; await loadHouseData(); }
+      btn.disabled = false; btn.innerHTML = 'ยืนยันบันทึก';
     }
 
     async function deleteHouse(hcode, houseNo) {
@@ -782,20 +860,29 @@
       }
     }
 
+    var osmDashHeaders = [];
     async function loadOsmDashboardData() {
       var tbody = document.getElementById('osmDashTableBody');
       tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border text-success spinner-border-sm"></div> กำลังเชื่อมพิกัดประมวลผลความรับผิดชอบ...</td></tr>';
       
       var res = await callAPI("getOsmDashboardData");
-      if (res && res.success && res.data.length > 1) {
+      if (res && res.success && res.data && res.data.length > 1) {
+        osmDashHeaders = res.data[0];
         rawOsmDashData = res.data.slice(1);
         
+        var colComm = osmDashHeaders.indexOf("community");
         var commFilter = document.getElementById('dashCommunityFilter'), uComm = new Set();
-        rawOsmDashData.forEach(r => { if(r[9]) uComm.add(r[9].toString().trim()); });
+        rawOsmDashData.forEach(r => { if(colComm > -1 && r[colComm]) uComm.add(r[colComm].toString().trim()); });
         commFilter.innerHTML = '<option value="">-- แสดงผลรวมสมาชิก อสม. ทุกชุมชน --</option>';
         Array.from(uComm).sort().forEach(c => { commFilter.innerHTML += `<option value="${c}">${c}</option>`; });
         
-        renderOsmDashboardTable(rawOsmDashData, res.data[0]);
+        renderOsmDashboardTable(rawOsmDashData, osmDashHeaders);
+      } else {
+        // 🌟 แสดงข้อความ error จริงแทนการค้างสปินเนอร์ไว้เฉยๆ เพื่อให้วินิจฉัยปัญหาได้
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger fw-bold">
+          <i class="bi bi-exclamation-triangle-fill fs-4 d-block mb-2"></i>
+          ไม่สามารถโหลดข้อมูลได้: ${(res && res.message) ? res.message : 'ไม่ทราบสาเหตุ กรุณาตรวจสอบการเชื่อมต่อ'}
+        </td></tr>`;
       }
     }
 
@@ -844,8 +931,9 @@
 
     function filterOsmDashboard() {
       var filterVal = document.getElementById('dashCommunityFilter').value;
-      var filtered = filterVal === "" ? rawOsmDashData : rawOsmDashData.filter(r => r[9] === filterVal);
-      renderOsmDashboardTable(filtered, ["ลำดับ","ชื่อ","ID","หมู่-หมู่บ้าน","หมายเลขโทรศัพท์","ที่อยู่","ลิงก์รูปภาพ","Email","Line ID","community","HN"]);
+      var colComm = osmDashHeaders.indexOf("community");
+      var filtered = filterVal === "" ? rawOsmDashData : rawOsmDashData.filter(r => colComm > -1 && (r[colComm] || '').toString().trim() === filterVal);
+      renderOsmDashboardTable(filtered, osmDashHeaders);
     }
 
     /* ====================================================================
@@ -898,6 +986,10 @@
         document.getElementById('profileEmail').value = p.email || "";
         document.getElementById('profileAddress').value = p.address || "";
         document.getElementById('profileImgUrl').value = p.imgUrl || "";
+      } else {
+        // 🌟 แสดงข้อความ error จริงแทนการปล่อยหน้าว่างเปล่าไว้เฉยๆ
+        document.getElementById('profileNameDisplay').innerText = "ไม่พบข้อมูล";
+        document.getElementById('profileCommDisplay').innerText = (res && res.message) ? res.message : "เกิดข้อผิดพลาดในการโหลดข้อมูล";
       }
     }
 
