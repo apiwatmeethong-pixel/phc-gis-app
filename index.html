@@ -279,7 +279,7 @@
       <a href="#" class="nav-link" id="bot-manageLog" onclick="showPage('manageLog')" style="display:none;"><i class="bi bi-journal-text"></i> Log</a>
     </div>
 
-    <!-- พื้นที่หน้าจอหลักแต่ละเพจแบบตัดขาดเอกเทศ -->
+    <!-- พื้นที่หน้าจอหลักแต่ละเพจแบบแยกอิสระระดับเดียวกันหมด -->
     <div class="container mt-4 mb-5">
       
       <!-- [1. หน้า Dashboard] -->
@@ -631,7 +631,7 @@
                   </div>
                   <div class="col-12">
                     <label class="form-label fw-bold text-muted small">ที่อยู่ปัจจุบันตามทะเบียน อสม.</label>
-                    <textarea class="form-control px-3" id="profileAddress" rows="2" style="border-radius: 10px Haus;"></textarea>
+                    <textarea class="form-control px-3" id="profileAddress" rows="2" style="border-radius: 10px;"></textarea>
                   </div>
                   <div class="col-12">
                     <label class="form-label fw-bold text-muted small">ลิงก์ URL รูปภาพประจำตัวผู้ใช้</label>
@@ -1023,7 +1023,12 @@
           if(adminLogBot) adminLogBot.style.display = 'flex';
         }
 
-        document.getElementById('loginSection').style.display = 'none';
+        // 🌟 แก้ไข: ย้ายคลาสซ่อนหน้าล็อกอินแก้ปัญหา display ซ้อนทับกัน
+        var loginSec = document.getElementById('loginSection');
+        if (loginSec) {
+          loginSec.classList.remove('d-flex');
+          loginSec.classList.add('d-none');
+        }
         document.getElementById('mainContent').style.display = 'block';
         
         var botNavMenu = document.getElementById('bottomNavMenu');
@@ -1081,7 +1086,12 @@
       var bottomNav = document.getElementById('bottomNavMenu');
       if(bottomNav) bottomNav.style.display = 'none'; 
       
-      document.getElementById('loginSection').style.display = 'flex'; 
+      // 🌟 แก้ไข: เรียกแสดงหน้าล็อกอินผ่าน Bootstrap Class
+      var loginSec = document.getElementById('loginSection');
+      if (loginSec) {
+        loginSec.classList.remove('d-none');
+        loginSec.classList.add('d-flex');
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
