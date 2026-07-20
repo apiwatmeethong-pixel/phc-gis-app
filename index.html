@@ -269,7 +269,9 @@
         box-shadow: none !important;
       }
       .page-section { display: none !important; }
-      #osmDashboard.active-section { display: block !important; }
+      /* 🌟 แก้บั๊ก: เดิมล็อกให้พิมพ์ได้เฉพาะหน้า osmDashboard เท่านั้น ทำให้พิมพ์รายงาน (เมนู 4) ไม่ออก
+         เปลี่ยนเป็นอนุญาตให้หน้าที่กำลังเปิดอยู่ (active-section) พิมพ์ได้เสมอ ไม่ว่าจะเป็นหน้าไหน */
+      .page-section.active-section { display: block !important; }
       
       table {
         width: 100% !important;
@@ -296,7 +298,7 @@
       <div class="card-body p-4 text-center">
         <img id="loginLogo" src="https://cdn-icons-png.flaticon.com/512/3211/3211184.png" alt="Logo" class="mb-3 shadow-sm" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover;">
         <h4 class="fw-bold text-dark mb-1">ระบบ อสม. พลัส (VHV Plus)</h4>
-        <p class="text-secondary small mb-4">ศบส.บ้านโทกหัวช้าง</p>
+        <p class="text-secondary small mb-4">ศบส.บ้านโทกหัวช้าง / สสอ.เกาะคา</p>
         
         <div class="alert alert-danger mb-3 py-2" id="loginError" style="display: none; font-size: 0.85rem;">
           <i class="bi bi-exclamation-triangle-fill"></i> รหัสผ่านผู้ใช้งานไม่ถูกต้อง!
@@ -385,7 +387,10 @@
             </div>
             <div class="col-lg-8 mb-3">
               <div class="card h-100 shadow-sm">
-                <div class="card-header"><i class="bi bi-geo-alt"></i> แผนที่ตำแหน่งพิกัดบ้าน</div>
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-1">
+                  <span><i class="bi bi-geo-alt"></i> แผนที่ตำแหน่งพิกัดบ้าน</span>
+                  <small class="fw-normal text-white-50">ข้อมูลพื้นที่รับผิดชอบของ ศสบ.บ้านโทกหัวช้างเท่านั้น</small>
+                </div>
                 <div class="card-body p-0"><div id="map" style="width: 100%; height: 350px; z-index: 1;"></div></div>
               </div>
             </div>
@@ -451,8 +456,9 @@
           <div class="card shadow-sm mb-3 no-print">
             <div class="card-body">
               <div class="row g-3">
-                <div class="col-md-6"><label class="form-label fw-bold">เลือกหมู่ข้อมูล</label><select id="reportMoo" class="form-select border-dark" onchange="updateReportFilters()"><option value="">-- เลือกหมู่ --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div>
-                <div class="col-md-6"><label class="form-label fw-bold">เลือกชุมชนย่อย</label><select id="reportComm" class="form-select border-dark" onchange="updateReportFiltersComm()"><option value="">-- ทุกชุมชนในหมู่นี้ --</option></select></div>
+                <div class="col-md-4"><label class="form-label fw-bold">เลือกหมู่ข้อมูล</label><select id="reportMoo" class="form-select border-dark" onchange="updateReportFilters()"><option value="">-- เลือกหมู่ --</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div>
+                <div class="col-md-4"><label class="form-label fw-bold">เลือกชุมชนย่อย</label><select id="reportComm" class="form-select border-dark" onchange="updateReportFiltersComm()"><option value="">-- ทุกชุมชนในหมู่นี้ --</option></select></div>
+                <div class="col-md-4"><label class="form-label fw-bold">กรองตาม อสม. ผู้รับผิดชอบ</label><select id="reportAsm" class="form-select border-dark" onchange="generateReport()"><option value="">-- ทุก อสม. --</option></select></div>
               </div>
             </div>
           </div>
@@ -483,6 +489,12 @@
               <div class="row">
                 <div class="col-md-4 text-center border-end pb-3">
                   <img id="profilePreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Avatar" class="img-thumbnail rounded-circle mb-3 shadow" style="width: 150px; height: 150px; object-fit: cover;">
+                  <div class="mb-3">
+                    <input type="file" id="profileImageFile" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleProfilePhotoSelected(event)">
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="document.getElementById('profileImageFile').click()"><i class="bi bi-camera-fill"></i> เปลี่ยนรูปภาพ</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" id="deletePhotoBtn" onclick="deleteProfilePhoto()"><i class="bi bi-trash"></i> ลบรูป</button>
+                    <div class="form-text">รองรับ JPG/PNG/WEBP ขนาดไม่เกิน 3MB — อัปโหลดรูปใหม่จะแทนที่รูปเดิมโดยอัตโนมัติ</div>
+                  </div>
                   <h5 class="fw-bold text-dark mb-1" id="profileNameDisplay">-</h5>
                   <span class="badge bg-dark px-3 py-1.5" id="profileCommDisplay">-</span>
                   <div class="mt-4 text-start bg-light p-3 rounded border text-dark font-medium small">
@@ -497,7 +509,6 @@
                     <div class="col-md-6"><label class="form-label fw-bold small">Line ID</label><input type="text" class="form-control border-dark" id="profileLineId"></div>
                     <div class="col-12"><label class="form-label fw-bold small">ที่อยู่อีเมล (Email)</label><input type="email" class="form-control border-dark" id="profileEmail"></div>
                     <div class="col-12"><label class="form-label fw-bold small">ที่อยู่ปัจจุบันตามทะเบียน</label><textarea class="form-control border-dark" id="profileAddress" rows="2"></textarea></div>
-                    <div class="col-12"><label class="form-label fw-bold small">ลิงก์ URL รูปถ่ายส่วนตัว</label><input type="text" class="form-control border-dark small" id="profileImgUrl" oninput="document.getElementById('profilePreview').src=this.value"></div>
                     <div class="col-12 text-end pt-2"><button class="btn btn-success px-4 fw-bold shadow" onclick="saveOsmProfile()"><i class="bi bi-save me-2"></i>บันทึกการปรับปรุงประวัติ</button></div>
                   </div>
                 </div>
@@ -576,6 +587,10 @@
           </div>
         </div>
 
+        <footer id="appFooter" class="no-print text-center text-muted small py-3 mt-3" style="border-top: 1px solid #dde5e1;">
+          © 2026 ระบบ อสม. พลัส (VHV Plus) Ver.3.3 | Design &amp; Developed by Apiwat Meethong
+        </footer>
+
       </div>
     </div>
   </div>
@@ -587,7 +602,12 @@
       <div class="modal-content border-dark">
         <div class="modal-header bg-success text-white"><h5 class="modal-title fw-bold"><i class="bi bi-pencil-square"></i> แก้ไขพิกัดและข้อมูลบ้าน</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body text-dark">
-          <input type="hidden" id="editHcode"><div class="text-center mb-2"><span>บ้านเลขที่</span><h4 id="displayHouseNo" class="text-success fw-bold"></h4><div id="displayHouseId11" class="small font-monospace text-secondary"></div></div>
+          <input type="hidden" id="editHcode"><div class="text-center mb-2"><span>บ้านเลขที่</span><h4 id="displayHouseNo" class="text-success fw-bold"></h4></div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small">รหัสประจำบ้าน 11 หลัก</label>
+            <input type="text" id="editHouseId11" class="form-control font-monospace" maxlength="11" inputmode="numeric" placeholder="กรอกรหัสประจำบ้าน 11 หลัก">
+            <div class="form-text">แก้ไขได้หากพิมพ์ผิด ระบบจะตรวจสอบไม่ให้ซ้ำกับรหัสอื่นในไฟล์</div>
+          </div>
           <div class="row mb-2"><div class="col-4"><label class="form-label small fw-bold">หมู่ที่</label><input type="text" id="editMoo" class="form-control text-center" readonly></div><div class="col-8"><label class="form-label small fw-bold">ชุมชนสกัด</label><select id="editCommunity" class="form-select border-dark"></select></div></div>
           <div class="mb-3"><label class="form-label fw-bold small">อสม.ผู้รับผิดชอบหลัก</label><select id="editAsm" class="form-select border-dark"></select></div>
           <div class="mb-3"><label class="form-label fw-bold small">สถานะเอกสาร</label><select class="form-select border-dark fw-bold" id="editStatus"><option value="ยังไม่ยืนยัน">ยังไม่ยืนยัน</option><option value="ยืนยันข้อมูล">ยืนยันข้อมูล</option></select></div>
@@ -638,7 +658,7 @@
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzdsB_pq3t7fv-H1Y7yVfwh892MhFb4To_T6HTco3xfc0ZQkwCWPWDf9jAQLugl7RarmQ/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzBIS3tRVHUhXvp9bdBeGA9knmmBj8KmFC712Xf2P7lNREkqS7ih5f1zjOkcJPTyB7bkA/exec";
     const API_KEY = "Tph-Osm-Gis-SecureKey-2026-XyZ"; 
 
     var globalHouseData=[], filteredDataGlobal=[], headers=[], currentPage=1, rowsPerPage=50;
@@ -682,6 +702,23 @@
       } catch (error) {
         console.error("API Connection Error:", error);
         return { success: false, message: "การเชื่อมต่อระบบขัดข้องฝั่งเครือข่าย" };
+      }
+    }
+
+    // 🌟 ใช้ POST แทน GET สำหรับข้อมูลขนาดใหญ่ (เช่น รูปภาพ base64) เพราะ GET มีข้อจำกัดความยาว URL
+    // ใช้ Content-Type: text/plain เพื่อเลี่ยงการยิง CORS preflight (OPTIONS) ซึ่ง Apps Script Web App ไม่รองรับ
+    async function callAPIUpload(action, params = {}) {
+      try {
+        var payload = Object.assign({ action: action, apiKey: API_KEY, currentUser: currentUser ? JSON.stringify(currentUser) : '' }, params);
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        return await response.json();
+      } catch (error) {
+        console.error("API Upload Error:", error);
+        return { success: false, message: "การเชื่อมต่อระบบขัดข้องฝั่งเครือข่าย (อัปโหลดไฟล์)" };
       }
     }
 
@@ -799,7 +836,7 @@
     function openEditModal(hcode, houseNo, comm, asm, status, lat, lng, moo, note, houseId11) {
       document.getElementById('editHcode').value = hcode;
       document.getElementById('displayHouseNo').innerText = houseNo;
-      document.getElementById('displayHouseId11').innerText = "รหัสประจำบ้าน 11 หลัก: " + (houseId11 || '-');
+      document.getElementById('editHouseId11').value = (houseId11 && houseId11 !== 'undefined') ? houseId11 : '';
       document.getElementById('editMoo').value = moo;
       
       var dropdown = document.getElementById('editCommunity');
@@ -821,8 +858,37 @@
     }
 
     async function saveData() {
-      var data = { hcode: document.getElementById('editHcode').value, comm: document.getElementById('editCommunity').value, asm: document.getElementById('editAsm').value, status: document.getElementById('editStatus').value, lat: document.getElementById('editLat').value, lng: document.getElementById('editLng').value, note: document.getElementById('editNote').value, userId: currentUser.userId };
-      var res = await callAPI("updateHouseData", data); alert(res.message); editModal.hide(); await loadHouseData(true);
+      var btn = event.target;
+      var hcode = document.getElementById('editHcode').value;
+      var houseId11 = document.getElementById('editHouseId11').value.trim();
+      var moo = document.getElementById('editMoo').value;
+      var comm = document.getElementById('editCommunity').value;
+      var houseNo = document.getElementById('displayHouseNo').innerText.trim();
+
+      if (houseId11.length !== 11) {
+        alert("⚠️ รหัสประจำบ้านต้องมี 11 หลักพอดี (ปัจจุบันกรอกมา " + houseId11.length + " หลัก)");
+        return;
+      }
+
+      btn.disabled = true; var origText = btn.innerHTML; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังตรวจสอบ...';
+
+      // 🌟 ตรวจสอบรหัสประจำบ้าน 11 หลักไม่ให้ซ้ำกับบ้านอื่นทั้งไฟล์ (ไม่รวมบ้านหลังนี้เอง)
+      var dupRes = await callAPI("checkHouseDuplicate", { moo: moo, comm: comm, houseNo: houseNo, houseId11: houseId11, excludeHcode: hcode });
+      if (!dupRes || !dupRes.success) {
+        alert((dupRes && dupRes.message) || "ไม่สามารถตรวจสอบข้อมูลซ้ำได้ กรุณาลองใหม่");
+        btn.disabled = false; btn.innerHTML = origText; return;
+      }
+      if (dupRes.exists) {
+        alert(dupRes.message || "⚠️ พบรหัสประจำบ้านนี้ซ้ำกับข้อมูลอื่นในไฟล์ กรุณาตรวจสอบ");
+        btn.disabled = false; btn.innerHTML = origText; return;
+      }
+
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...';
+      var data = { hcode: hcode, comm: comm, asm: document.getElementById('editAsm').value, status: document.getElementById('editStatus').value, lat: document.getElementById('editLat').value, lng: document.getElementById('editLng').value, note: document.getElementById('editNote').value, houseId11: houseId11, userId: currentUser.userId };
+      var res = await callAPI("updateHouseData", data);
+      alert(res.message);
+      if (res.success) { editModal.hide(); await loadHouseData(true); }
+      btn.disabled = false; btn.innerHTML = origText;
     }
 
     function getLocation() {
@@ -967,7 +1033,7 @@
       if(pageId === 'dashboard') { 
         setTimeout(() => { 
           if(!map){ 
-            map=L.map('map').setView([18.17, 99.39],13); 
+            map=L.map('map').setView([18.2696, 99.5071], 14); 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); 
             markersGroup=L.layerGroup().addTo(map); 
           } 
@@ -985,7 +1051,7 @@
         }
         setTimeout(() => { 
           if(!searchMap) { 
-            searchMap = L.map('searchMapArea').setView([18.17, 99.39], 13); 
+            searchMap = L.map('searchMapArea').setView([18.2696, 99.5071], 14); 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(searchMap); 
           } 
           searchMap.invalidateSize(); 
@@ -1001,6 +1067,7 @@
           rc.disabled = false;
           rc.innerHTML = '<option value="">-- ทุกชุมชนในหมู่นี้ --</option>';
           (communityMap[currentUser.moo] || []).forEach(c => { rc.innerHTML += `<option value="${c}">${c}</option>`; });
+          updateReportAsmFilter();
           generateReport();
         }
       }
@@ -1013,11 +1080,13 @@
       if(pageId === 'manageLog') { setTimeout(() => { loadAuditLog(); }, 200); }
     }
 
+    var currentProfileImgUrl = "";
     async function loadOsmProfileData() {
       var res = await callAPI("getOsmProfile");
       if (res && res.success) {
         var p = res.data;
-        document.getElementById('profilePreview').src = p.imgUrl;
+        currentProfileImgUrl = p.imgUrl || "";
+        document.getElementById('profilePreview').src = currentProfileImgUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
         document.getElementById('profileNameDisplay').innerText = p.name || "-";
         document.getElementById('profileCommDisplay').innerText = p.community || "ไม่ระบุพื้นที่";
         document.getElementById('profileIdCardDisplay').innerText = p.idCard || "-";
@@ -1026,7 +1095,6 @@
         document.getElementById('profileLineId').value = p.lineId || "";
         document.getElementById('profileEmail').value = p.email || "";
         document.getElementById('profileAddress').value = p.address || "";
-        document.getElementById('profileImgUrl').value = p.imgUrl || "";
       } else {
         // 🌟 แสดงข้อความ error จริงแทนการปล่อยหน้าว่างเปล่าไว้เฉยๆ
         document.getElementById('profileNameDisplay').innerText = "ไม่พบข้อมูล";
@@ -1035,8 +1103,49 @@
     }
 
     async function saveOsmProfile() {
-      var payload = { phone: document.getElementById('profilePhone').value, lineId: document.getElementById('profileLineId').value, email: document.getElementById('profileEmail').value, address: document.getElementById('profileAddress').value, imgUrl: document.getElementById('profileImgUrl').value };
+      // 🌟 ไม่ส่ง imgUrl ในฟอร์มนี้อีกต่อไป — รูปภาพจัดการแยกผ่านปุ่มเปลี่ยนรูป/ลบรูปทันที เพื่อกันการเขียนทับ URL รูปโดยไม่ตั้งใจ
+      var payload = { phone: document.getElementById('profilePhone').value, lineId: document.getElementById('profileLineId').value, email: document.getElementById('profileEmail').value, address: document.getElementById('profileAddress').value };
       var res = await callAPI("updateOsmProfile", payload); alert(res.message); loadOsmProfileData();
+    }
+
+    // 🌟 เลือกไฟล์รูปใหม่ -> แปลงเป็น base64 แล้วอัปโหลดทับรูปเดิมทันที (ลบไฟล์เก่าออกจาก Drive ให้อัตโนมัติ)
+    function handleProfilePhotoSelected(event) {
+      var file = event.target.files[0];
+      if (!file) return;
+      if (!file.type.match(/^image\/(png|jpeg|webp)$/)) { alert("รองรับเฉพาะไฟล์ภาพชนิด JPG, PNG หรือ WEBP เท่านั้น"); event.target.value = ''; return; }
+      if (file.size > 3 * 1024 * 1024) { alert("ไฟล์รูปภาพต้องมีขนาดไม่เกิน 3MB"); event.target.value = ''; return; }
+
+      var reader = new FileReader();
+      reader.onload = async function(e) {
+        var dataUrl = e.target.result; // "data:image/jpeg;base64,XXXX"
+        var base64Data = dataUrl.split(',')[1];
+        document.getElementById('profilePreview').src = dataUrl; // แสดงตัวอย่างทันทีระหว่างอัปโหลด
+
+        var res = await callAPIUpload("uploadOsmProfilePhoto", { imageData: base64Data, mimeType: file.type });
+        if (res && res.success) {
+          currentProfileImgUrl = res.imgUrl;
+          document.getElementById('profilePreview').src = res.imgUrl;
+          alert(res.message || "✅ อัปโหลดรูปภาพใหม่เรียบร้อยแล้ว");
+        } else {
+          alert((res && res.message) || "❌ อัปโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่");
+          document.getElementById('profilePreview').src = currentProfileImgUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+        }
+        event.target.value = '';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function deleteProfilePhoto() {
+      if (!currentProfileImgUrl) { alert("ยังไม่มีรูปภาพที่อัปโหลดไว้"); return; }
+      if (!confirm("ยืนยันลบรูปภาพส่วนตัวปัจจุบัน? การลบนี้ไม่สามารถกู้คืนได้")) return;
+      var res = await callAPI("deleteOsmProfilePhoto");
+      if (res && res.success) {
+        currentProfileImgUrl = "";
+        document.getElementById('profilePreview').src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+        alert(res.message || "✅ ลบรูปภาพเรียบร้อยแล้ว");
+      } else {
+        alert((res && res.message) || "❌ ลบรูปภาพไม่สำเร็จ");
+      }
     }
 
     function drawDashboard(data) {
@@ -1145,14 +1254,32 @@
     function updateReportFilters() {
       var comm = document.getElementById('reportComm'); comm.innerHTML = '<option value="">-- ทุกชุมชนในหมู่นี้ --</option>';
       (communityMap[document.getElementById('reportMoo').value] || []).forEach(c => { comm.innerHTML += `<option value="${c}">${c}</option>`; });
+      updateReportAsmFilter();
       generateReport();
     }
-    function updateReportFiltersComm() { generateReport(); }
-    function generateReport() {
+    function updateReportFiltersComm() { updateReportAsmFilter(); generateReport(); }
+
+    // 🌟 เพิ่มตัวกรองรายชื่อ อสม. ให้เลือกกรองเฉพาะคนในหมู่/ชุมชนที่เลือกไว้
+    function updateReportAsmFilter() {
       var m = document.getElementById('reportMoo').value, c = document.getElementById('reportComm').value;
+      var asmSel = document.getElementById('reportAsm');
+      var prevVal = asmSel.value;
+      var subset = globalHouseData.slice(1).filter(r => r[headers.indexOf('หมู่ที่')]==m && (!c || r[headers.indexOf('ชุมชนบ้าน')]==c));
+      var names = new Set();
+      subset.forEach(r => { var n = r[headers.indexOf('อสม')]; if (n) names.add(n.toString().trim()); });
+      asmSel.innerHTML = '<option value="">-- ทุก อสม. --</option>';
+      Array.from(names).sort().forEach(n => { asmSel.innerHTML += `<option value="${n}" ${n===prevVal?'selected':''}>${n}</option>`; });
+    }
+
+    function generateReport() {
+      var m = document.getElementById('reportMoo').value, c = document.getElementById('reportComm').value, a = document.getElementById('reportAsm').value;
       if(!m) { document.getElementById('reportTableBody').innerHTML = '<tr><td colspan="5" class="text-center py-4">กรุณาระบุหมู่ข้อมูล</td></tr>'; reportFilteredData = []; updateReportPaginationUI(); return; }
-      reportFilteredData = globalHouseData.slice(1).filter(r => r[headers.indexOf('หมู่ที่')]==m && (!c || r[headers.indexOf('ชุมชนบ้าน')]==c));
-      document.getElementById('reportHeader').innerText = `พื้นที่ หมู่ที่ ${m} ${c?' ชุมชน'+c:''}`;
+      reportFilteredData = globalHouseData.slice(1).filter(r => 
+        r[headers.indexOf('หมู่ที่')]==m && 
+        (!c || r[headers.indexOf('ชุมชนบ้าน')]==c) &&
+        (!a || (r[headers.indexOf('อสม')]||'').toString().trim()==a)
+      );
+      document.getElementById('reportHeader').innerText = `พื้นที่ หมู่ที่ ${m} ${c?' ชุมชน'+c:''}${a?' | อสม. '+a:''}`;
       reportCurrentPage = 1;
       renderReportPage();
     }
