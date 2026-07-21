@@ -330,7 +330,10 @@
     <!-- 🖥️ แถบเมนูด้านซ้ายมือ (Sidebar) สำหรับ PC -->
     <aside class="sidebar" id="mainSidebar">
       <div class="sidebar-header">
-        <span class="fw-bold"><i class="bi bi-activity"></i> VHV Plus Menu</span>
+        <span class="fw-bold d-flex align-items-center gap-2">
+          <img id="sidebarLogoImg" src="" alt="โลโก้ระบบ" style="height:28px; width:28px; object-fit:contain; border-radius:4px; display:none;">
+          <i class="bi bi-activity" id="sidebarLogoIcon"></i> VHV Plus Menu
+        </span>
         <button class="btn btn-sm text-white border-0" onclick="toggleSidebar()"><i class="bi bi-list fs-5"></i></button>
       </div>
       <div class="sidebar-menu">
@@ -350,7 +353,8 @@
 
     <!-- 📱 แถบหัวบนสำหรับมือถือ -->
     <header class="mobile-header">
-      <h6 class="mb-0 fw-bold"><i class="bi bi-geo-alt-fill"></i> ระบบข้อมูลสุขภาพ อสม.</h6>
+      <img id="mobileLogoImg" src="" alt="โลโก้ระบบ" style="height:26px; width:26px; object-fit:contain; border-radius:4px; display:none; margin-right:8px;">
+      <h6 class="mb-0 fw-bold"><i class="bi bi-geo-alt-fill" id="mobileLogoIcon"></i> ระบบข้อมูลสุขภาพ อสม.</h6>
       <button class="btn btn-sm text-white ms-auto border-0" onclick="logout()"><i class="bi bi-box-arrow-right fs-5"></i></button>
     </header>
 
@@ -575,7 +579,13 @@
 
         <!-- [8. หน้าจัดการระบบ Log (PDPA)] -->
         <div id="manageLog" class="page-section">
-          <h3 class="mb-3 fw-bold text-danger"><i class="bi bi-journal-text"></i> 8. บันทึกกิจกรรมระบบความปลอดภัย (PDPA Audit Trail)</h3>
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h3 class="fw-bold text-danger mb-0"><i class="bi bi-journal-text"></i> 8. บันทึกกิจกรรมระบบความปลอดภัย (PDPA Audit Trail)</h3>
+            <div>
+              <button class="btn btn-outline-success btn-sm" onclick="exportAuditLogCSV()"><i class="bi bi-download"></i> สำรองข้อมูล (Export CSV)</button>
+              <button class="btn btn-outline-danger btn-sm" onclick="resetAuditLog()"><i class="bi bi-eraser-fill"></i> รีเซ็ต/ล้างข้อมูล Log</button>
+            </div>
+          </div>
           <div class="card shadow-sm">
             <div class="card-body">
               <div class="row g-2 mb-3">
@@ -658,7 +668,7 @@
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzBIS3tRVHUhXvp9bdBeGA9knmmBj8KmFC712Xf2P7lNREkqS7ih5f1zjOkcJPTyB7bkA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbx2jMOrxCJhVb99_M59poJHLnat8lWzvN4ioaUx9-hvFLFsTrJVmL8-nF15ZH8LdFPRmA/exec";
     const API_KEY = "Tph-Osm-Gis-SecureKey-2026-XyZ"; 
 
     var globalHouseData=[], filteredDataGlobal=[], headers=[], currentPage=1, rowsPerPage=50;
@@ -759,6 +769,7 @@
         await loadOsmList();
         await loadHouseData();
         await loadUsers();
+        await loadSystemSettings();
       } else {
         document.getElementById('loginError').style.display = 'block';
       }
@@ -1034,7 +1045,7 @@
         setTimeout(() => { 
           if(!map){ 
             map=L.map('map').setView([18.2696, 99.5071], 14); 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); 
+            addBaseLayers_(map);
             markersGroup=L.layerGroup().addTo(map); 
           } 
           map.invalidateSize(); 
@@ -1052,7 +1063,7 @@
         setTimeout(() => { 
           if(!searchMap) { 
             searchMap = L.map('searchMapArea').setView([18.2696, 99.5071], 14); 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(searchMap); 
+            addBaseLayers_(searchMap);
           } 
           searchMap.invalidateSize(); 
         }, 300); 
@@ -1166,6 +1177,27 @@
       });
     }
 
+    // 🌟 เพิ่มเลเยอร์แผนที่ให้เลือกได้ 3 แบบ: ถนน / ดาวเทียม / ภูมิประเทศ (ระดับความสูง-เทือกเขา)
+    function addBaseLayers_(targetMap) {
+      var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+      });
+      var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri', maxZoom: 19
+      });
+      var terrainLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap', maxZoom: 17
+      });
+
+      streetLayer.addTo(targetMap);
+      var baseMaps = {
+        "🗺️ แผนที่ถนน (Street)": streetLayer,
+        "🛰️ ภาพถ่ายดาวเทียม (Satellite)": satelliteLayer,
+        "⛰️ ภูมิประเทศ (Terrain)": terrainLayer
+      };
+      L.control.layers(baseMaps, null, { position: 'topright', collapsed: true }).addTo(targetMap);
+    }
+
     function loadMapMarkers() {
       if(!markersGroup) return; markersGroup.clearLayers();
       var c = { lat: headers.indexOf('ละติจูด'), lng: headers.indexOf('ลองจิจูด'), hNo: headers.indexOf('บ้านเลขที่'), status: headers.indexOf('สถานะการดูแล'), moo: headers.indexOf('หมู่ที่') };
@@ -1178,6 +1210,31 @@
         bounds.push([lt, ln]);
       });
       if(bounds.length > 0) map.fitBounds(bounds);
+    }
+
+    // 🌟 โหลดโลโก้ระบบปัจจุบันมาแสดงที่แถบเมนูด้านซ้าย + ช่องตั้งค่าของ Admin
+    async function loadSystemSettings() {
+      var res = await callAPI("getSystemSettings");
+      if (res && res.success && res.data && res.data.logoUrl) {
+        var logoUrl = res.data.logoUrl;
+        var img = document.getElementById('sidebarLogoImg');
+        var icon = document.getElementById('sidebarLogoIcon');
+        img.src = logoUrl;
+        img.style.display = 'inline-block';
+        icon.style.display = 'none';
+        var settingInput = document.getElementById('settingLogoUrl');
+        if (settingInput) settingInput.value = logoUrl;
+      }
+    }
+
+    async function saveLogo(btn) {
+      var url = document.getElementById('settingLogoUrl').value.trim();
+      if (!url) { alert("กรุณากรอกลิงก์ URL รูปโลโก้ก่อนบันทึก"); return; }
+      btn.disabled = true; var origText = btn.innerHTML; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...';
+      var res = await callAPI("saveSystemSettings", { logoUrl: url, userId: currentUser.userId });
+      alert(res.message);
+      if (res.success) { await loadSystemSettings(); }
+      btn.disabled = false; btn.innerHTML = origText;
     }
 
     async function loadUsers() {
@@ -1195,19 +1252,27 @@
       document.getElementById('userIdInput').value = ''; document.getElementById('fullnameInput').value = '';
       document.getElementById('mooInput').value = ''; updateUserModalCommunity();
       document.getElementById('usernameInput').value = ''; document.getElementById('passwordInput').value = '';
+      document.getElementById('passwordInput').placeholder = 'กำหนดรหัสผ่าน';
+      document.getElementById('typeInput').value = 'user';
       userModal.show();
     }
 
     function updateUserModalCommunity(selectedComm) {
       var d = document.getElementById('userInputCommunity'); d.innerHTML = '<option value="">-- เลือกชุมชน --</option>';
-      (communityMap[document.getElementById('mooInput').value] || []).forEach(c => { d.innerHTML += `<option value="${c}" ${c===selectedComm?'selected':''}>${c}</option>`; });
+      var cleanSelected = (selectedComm || '').toString().trim();
+      (communityMap[document.getElementById('mooInput').value] || []).forEach(c => { d.innerHTML += `<option value="${c}" ${c.trim()===cleanSelected?'selected':''}>${c}</option>`; });
     }
 
     function editUser(id, user, type, comm, name, moo) {
-      document.getElementById('userIdInput').value = id; document.getElementById('fullnameInput').value = name;
-      document.getElementById('mooInput').value = moo; updateUserModalCommunity(comm);
-      document.getElementById('usernameInput').value = user; document.getElementById('passwordInput').value = '';
-      document.getElementById('typeInput').value = type; userModal.show();
+      document.getElementById('userIdInput').value = (id||'').toString().trim();
+      document.getElementById('fullnameInput').value = (name||'').toString().trim();
+      document.getElementById('mooInput').value = (moo||'').toString().trim();
+      updateUserModalCommunity(comm);
+      document.getElementById('usernameInput').value = (user||'').toString().trim();
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('passwordInput').placeholder = 'เว้นว่างไว้หากไม่ต้องการเปลี่ยนรหัสผ่าน';
+      document.getElementById('typeInput').value = (type||'user').toString().trim();
+      userModal.show();
     }
 
     async function processSaveUser() {
@@ -1215,15 +1280,64 @@
       var res = await callAPI("saveUserData", data); alert(res.message); userModal.hide(); loadUsers();
     }
 
+    var globalLogHeaders = [];
     async function loadAuditLog() {
       var res = await callAPI("getAuditLog");
       if (res && res.success && res.data.length > 1) {
+        globalLogHeaders = res.data[0];
         globalLogData = res.data.slice(1).reverse();
-        var tb = document.getElementById('logTableBody'); tb.innerHTML = '';
-        globalLogData.forEach(r => {
-          tb.innerHTML += `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td><span class="badge bg-secondary">${r[2]}</span></td><td><code>${r[4]}</code></td><td>${r[5]}</td><td>${r[6]}</td><td class="small">${r[7]}</td></tr>`;
-        });
+        renderLogRows(globalLogData);
+      } else {
+        globalLogData = [];
+        document.getElementById('logTableBody').innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${(res && res.message) || 'ไม่มีข้อมูล Log'}</td></tr>`;
       }
+    }
+
+    function renderLogRows(rows) {
+      var tb = document.getElementById('logTableBody'); tb.innerHTML = '';
+      if (!rows || rows.length === 0) { tb.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">ไม่พบรายการที่ตรงกับเงื่อนไข</td></tr>'; return; }
+      rows.forEach(r => {
+        tb.innerHTML += `<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td><span class="badge bg-secondary">${r[2]}</span></td><td><code>${r[4]}</code></td><td>${r[5]}</td><td>${r[6]}</td><td class="small">${r[7]}</td></tr>`;
+      });
+    }
+
+    // 🌟 กรองรายการ log ตามคำค้นหา (ชื่อผู้ใช้/ฟังก์ชัน/target/รายละเอียด) และตามประเภทสิทธิ์ที่เลือก
+    function filterLogTable() {
+      var term = document.getElementById('logSearchInput').value.toLowerCase().trim();
+      var typeFilter = document.getElementById('logTypeFilter').value;
+      var filtered = globalLogData.filter(r => {
+        var matchesType = !typeFilter || r[3] === typeFilter;
+        var matchesTerm = !term || r.join(' ').toLowerCase().indexOf(term) !== -1;
+        return matchesType && matchesTerm;
+      });
+      renderLogRows(filtered);
+    }
+
+    // 🌟 สำรองข้อมูล Log ทั้งหมดเป็นไฟล์ CSV ก่อนล้างข้อมูล (เพื่อรักษาหลักฐานตามมาตรฐาน PDPA)
+    function exportAuditLogCSV() {
+      if (!globalLogData || globalLogData.length === 0) { alert("ไม่มีข้อมูล Log ให้สำรอง"); return; }
+      var headerRow = globalLogHeaders.length ? globalLogHeaders : ['วัน-เวลา','ผู้ใช้งาน','สิทธิ์','ประเภท','ฟังก์ชัน','Target ID','สถานะ','รายละเอียดคำขอ'];
+      var escapeCsv = v => `"${(v === undefined || v === null ? '' : v.toString()).replace(/"/g, '""')}"`;
+      var csvRows = [headerRow.map(escapeCsv).join(',')];
+      globalLogData.forEach(r => { csvRows.push(r.map(escapeCsv).join(',')); });
+      var csvContent = "\uFEFF" + csvRows.join('\r\n'); // ใส่ BOM กัน Excel อ่านภาษาไทยเพี้ยน
+      var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = "vhv_plus_audit_log_backup_" + new Date().toISOString().slice(0,10) + ".csv";
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    // 🌟 ล้างข้อมูล Log ทั้งหมด (Admin เท่านั้น) — บังคับให้สำรองข้อมูลก่อนเสมอเพื่อความปลอดภัย
+    async function resetAuditLog() {
+      if (!globalLogData || globalLogData.length === 0) { alert("ไม่มีข้อมูล Log ให้ล้าง"); return; }
+      if (!confirm("⚠️ ระบบจะดาวน์โหลดไฟล์สำรองข้อมูล Log ให้อัตโนมัติก่อนลบ กรุณาตรวจสอบว่าไฟล์ถูกบันทึกแล้ว จากนั้นระบบจะลบข้อมูล Log ทั้งหมดออกจากระบบอย่างถาวร ยืนยันดำเนินการต่อ?")) return;
+      exportAuditLogCSV();
+      setTimeout(async () => {
+        var res = await callAPI("clearAuditLog");
+        alert(res.message || (res.success ? "✅ ล้างข้อมูล Log เรียบร้อยแล้ว" : "❌ ล้างข้อมูลไม่สำเร็จ"));
+        if (res.success) loadAuditLog();
+      }, 600); // หน่วงเล็กน้อยให้ดาวน์โหลดไฟล์ CSV เริ่มก่อน
     }
 
     function updateSearchCommunity() {
@@ -1240,13 +1354,25 @@
     }
     function locateHouseOnMap() {
       var m = document.getElementById('searchMoo').value, c = document.getElementById('searchComm').value, h = document.getElementById('searchHouseSelect').value;
-      var match = globalHouseData.slice(1).find(r => r[headers.indexOf('หมู่ที่')]==m && r[headers.indexOf('ชุมชนบ้าน')]==c && r[headers.indexOf('บ้านเลขที่')]==h);
+      var colMoo = headers.indexOf('หมู่ที่'), colComm = headers.indexOf('ชุมชนบ้าน'), colHouse = headers.indexOf('บ้านเลขที่'), colAsm = headers.indexOf('อสม'), colStatus = headers.indexOf('สถานะการดูแล'), colHouseId11 = headers.indexOf('รหัสประจำบ้าน 11 หลัก');
+      var match = globalHouseData.slice(1).find(r => r[colMoo]==m && r[colComm]==c && r[colHouse]==h);
       if(match) {
         var lt = parseFloat(match[headers.indexOf('ละติจูด')]), ln = parseFloat(match[headers.indexOf('ลองจิจูด')]);
         if(!lt || !ln) { alert("ยังไม่ได้ปักหมุดพิกัดละติจูด/ลองจิจูด"); return; }
+        var asmName = match[colAsm] || 'ยังไม่ระบุ อสม. ผู้รับผิดชอบ';
+        var status = match[colStatus] || 'ยังไม่ยืนยัน';
+        var statusColor = status === 'ยืนยันข้อมูล' ? '#0f5132' : '#dc3545';
+        var houseId11 = (colHouseId11 > -1 && match[colHouseId11]) ? match[colHouseId11] : '-';
         searchMap.setView([lt, ln], 18);
         if(searchMarker) searchMap.removeLayer(searchMarker);
-        searchMarker = L.circleMarker([lt, ln], {radius:9, color:'#fff', fillColor:'#0d6efd', fillOpacity:0.9}).addTo(searchMap).bindPopup(`<b>บ้านเลขที่:</b> ${h}`).openPopup();
+        var popupHTML = `<div style="min-width:190px;">
+          <b>บ้านเลขที่:</b> ${h}<br>
+          <b>หมู่ ${m} ${c}</b><br>
+          <b>รหัสประจำบ้าน 11 หลัก:</b> <span class="font-monospace">${houseId11}</span><br>
+          <b>อสม. ผู้รับผิดชอบ:</b> <span class="text-primary fw-bold">${asmName}</span><br>
+          <b>สถานะ:</b> <span style="color:${statusColor}; font-weight:bold;">${status}</span>
+        </div>`;
+        searchMarker = L.circleMarker([lt, ln], {radius:9, color:'#fff', fillColor:'#0d6efd', fillOpacity:0.9}).addTo(searchMap).bindPopup(popupHTML).openPopup();
       }
     }
 
