@@ -298,7 +298,7 @@
       <div class="card-body p-4 text-center">
         <img id="loginLogo" src="https://lh3.googleusercontent.com/d/1nT4I_XyBwaClH6GMqc7Z5ma9ieY7polz" alt="Logo" class="mb-3 shadow-sm" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover;">
         <h4 class="fw-bold text-dark mb-1">ระบบ อสม. พลัส (VHV Plus)</h4>
-        <p class="text-secondary small mb-4">ศบส.บ้านโทกหัวช้าง</p>
+        <p class="text-secondary small mb-4">ศบส.บ้านโทกหัวช้าง/เทศบาลเมืองเขลางค์นคร</p>
         
         <div class="alert alert-danger mb-3 py-2" id="loginError" style="display: none; font-size: 0.85rem;">
           <i class="bi bi-exclamation-triangle-fill"></i> รหัสผ่านผู้ใช้งานไม่ถูกต้อง!
@@ -446,6 +446,13 @@
                 <div class="col-md-4"><label class="form-label fw-bold">เลือกชุมชน</label><select id="searchComm" class="form-select border-dark" onchange="updateSearchHouse()"><option value="">-- รอระบุหมู่ --</option></select></div>
                 <div class="col-md-4"><label class="form-label fw-bold">เลือกบ้านเลขที่</label><select id="searchHouseSelect" class="form-select border-dark" onchange="locateHouseOnMap()"><option value="">-- รอระบุชุมชน --</option></select></div>
               </div>
+            </div>
+          </div>
+          <div id="searchResultBar" class="alert alert-success d-none d-flex flex-wrap justify-content-between align-items-center gap-2 shadow-sm" role="alert">
+            <div id="searchResultText" class="fw-bold"></div>
+            <div class="d-flex gap-2">
+              <a id="googleMapsLink" href="#" target="_blank" rel="noopener" class="btn btn-primary btn-sm"><i class="bi bi-geo-alt-fill"></i> เปิดใน Google Maps</a>
+              <a id="googleMapsDirLink" href="#" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm"><i class="bi bi-signpost-2-fill"></i> นำทาง (Directions)</a>
             </div>
           </div>
           <div class="card shadow-sm"><div class="card-body p-0"><div id="searchMapArea" style="width: 100%; height: 420px; z-index: 1;"></div></div></div>
@@ -1364,18 +1371,30 @@
       var hs = document.getElementById('searchHouseSelect'); hs.innerHTML = '<option value="">-- เลือกบ้านเลขที่ --</option>';
       globalHouseData.slice(1).filter(r => r[headers.indexOf('หมู่ที่')]==document.getElementById('searchMoo').value && r[headers.indexOf('ชุมชนบ้าน')]==document.getElementById('searchComm').value)
         .forEach(r => { hs.innerHTML += `<option value="${r[headers.indexOf('บ้านเลขที่')]}">${r[headers.indexOf('บ้านเลขที่')]}</option>`; });
+      var resultBar = document.getElementById('searchResultBar');
+      if (resultBar) resultBar.classList.add('d-none');
     }
     function locateHouseOnMap() {
       var m = document.getElementById('searchMoo').value, c = document.getElementById('searchComm').value, h = document.getElementById('searchHouseSelect').value;
       var colMoo = headers.indexOf('หมู่ที่'), colComm = headers.indexOf('ชุมชนบ้าน'), colHouse = headers.indexOf('บ้านเลขที่'), colAsm = headers.indexOf('อสม'), colStatus = headers.indexOf('สถานะการดูแล'), colHouseId11 = headers.indexOf('รหัสประจำบ้าน 11 หลัก');
       var match = globalHouseData.slice(1).find(r => r[colMoo]==m && r[colComm]==c && r[colHouse]==h);
+      var resultBar = document.getElementById('searchResultBar');
       if(match) {
         var lt = parseFloat(match[headers.indexOf('ละติจูด')]), ln = parseFloat(match[headers.indexOf('ลองจิจูด')]);
-        if(!lt || !ln) { alert("ยังไม่ได้ปักหมุดพิกัดละติจูด/ลองจิจูด"); return; }
+        if(!lt || !ln) { alert("ยังไม่ได้ปักหมุดพิกัดละติจูด/ลองจิจูด"); resultBar.classList.add('d-none'); return; }
         var asmName = match[colAsm] || 'ยังไม่ระบุ อสม. ผู้รับผิดชอบ';
         var status = match[colStatus] || 'ยังไม่ยืนยัน';
         var statusColor = status === 'ยืนยันข้อมูล' ? '#0f5132' : '#dc3545';
         var houseId11 = (colHouseId11 > -1 && match[colHouseId11]) ? match[colHouseId11] : '-';
+
+        // 🌟 ลิงก์เปิด Google Maps / นำทาง ด้วยพิกัดของบ้านหลังนี้
+        var gmapsViewUrl = `https://www.google.com/maps/search/?api=1&query=${lt},${ln}`;
+        var gmapsDirUrl = `https://www.google.com/maps/dir/?api=1&destination=${lt},${ln}`;
+        document.getElementById('googleMapsLink').href = gmapsViewUrl;
+        document.getElementById('googleMapsDirLink').href = gmapsDirUrl;
+        document.getElementById('searchResultText').innerText = `📍 บ้านเลขที่ ${h} หมู่ ${m} ${c} — อสม. ${asmName}`;
+        resultBar.classList.remove('d-none');
+
         searchMap.setView([lt, ln], 18);
         if(searchMarker) searchMap.removeLayer(searchMarker);
         var popupHTML = `<div style="min-width:190px;">
@@ -1383,9 +1402,12 @@
           <b>หมู่ ${m} ${c}</b><br>
           <b>รหัสประจำบ้าน 11 หลัก:</b> <span class="font-monospace">${houseId11}</span><br>
           <b>อสม. ผู้รับผิดชอบ:</b> <span class="text-primary fw-bold">${asmName}</span><br>
-          <b>สถานะ:</b> <span style="color:${statusColor}; font-weight:bold;">${status}</span>
+          <b>สถานะ:</b> <span style="color:${statusColor}; font-weight:bold;">${status}</span><br>
+          <a href="${gmapsViewUrl}" target="_blank" rel="noopener" class="btn btn-primary btn-sm w-100 mt-2"><i class="bi bi-geo-alt-fill"></i> เปิดใน Google Maps</a>
         </div>`;
         searchMarker = L.circleMarker([lt, ln], {radius:9, color:'#fff', fillColor:'#0d6efd', fillOpacity:0.9}).addTo(searchMap).bindPopup(popupHTML).openPopup();
+      } else {
+        resultBar.classList.add('d-none');
       }
     }
 
