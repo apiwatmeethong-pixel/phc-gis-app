@@ -298,7 +298,7 @@
       <div class="card-body p-4 text-center">
         <img id="loginLogo" src="https://lh3.googleusercontent.com/d/1nT4I_XyBwaClH6GMqc7Z5ma9ieY7polz" alt="Logo" class="mb-3 shadow-sm" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover;">
         <h4 class="fw-bold text-dark mb-1">ระบบ อสม. พลัส (VHV Plus)</h4>
-        <p class="text-secondary small mb-4">ศบส.บ้านโทกหัวช้าง /เทศบาลเมืองเขลางค์นคร</p>
+        <p class="text-secondary small mb-4">ศบส.บ้านโทกหัวช้าง</p>
         
         <div class="alert alert-danger mb-3 py-2" id="loginError" style="display: none; font-size: 0.85rem;">
           <i class="bi bi-exclamation-triangle-fill"></i> รหัสผ่านผู้ใช้งานไม่ถูกต้อง!
@@ -622,7 +622,7 @@
           <div class="mb-3"><label class="form-label fw-bold small">อสม.ผู้รับผิดชอบหลัก</label><select id="editAsm" class="form-select border-dark"></select></div>
           <div class="mb-3"><label class="form-label fw-bold small">สถานะเอกสาร</label><select class="form-select border-dark fw-bold" id="editStatus"><option value="ยังไม่ยืนยัน">ยังไม่ยืนยัน</option><option value="ยืนยันข้อมูล">ยืนยันข้อมูล</option></select></div>
           <div class="mb-3"><label class="form-label fw-bold small">หมายเหตุ</label><textarea id="editNote" class="form-control border-dark" rows="2"></textarea></div>
-          <div class="mb-2"><label class="form-label fw-bold text-success small"><i class="bi bi-geo-alt"></i> พิกัดระบุตารางแผนที่</label><div class="input-group mb-2"><input type="text" id="editLat" class="form-control border-dark" readonly><input type="text" id="editLng" class="form-control border-dark" readonly></div><button class="btn btn-outline-success btn-sm w-100 fw-bold" onclick="getLocation()"><i class="bi bi-cursor-fill"></i> กดจับพิกัดปัจจุบันด้วย GPS โทรศัพท์</button></div>
+          <div class="mb-2"><label class="form-label fw-bold text-success small"><i class="bi bi-geo-alt"></i> พิกัดระบุตารางแผนที่</label><div class="input-group mb-2"><input type="text" id="editLat" class="form-control border-dark" placeholder="ละติจูด (เช่น 18.263841)" inputmode="decimal"><input type="text" id="editLng" class="form-control border-dark" placeholder="ลองจิจูด (เช่น 99.591682)" inputmode="decimal"></div><div class="form-text mb-1">กรอกพิกัดเองได้โดยตรง หรือกดปุ่มด้านล่างเพื่อจับพิกัดปัจจุบันอัตโนมัติ</div><button class="btn btn-outline-success btn-sm w-100 fw-bold" onclick="getLocation()"><i class="bi bi-cursor-fill"></i> กดจับพิกัดปัจจุบันด้วย GPS โทรศัพท์</button></div>
         </div>
         <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button><button type="button" class="btn btn-success px-4" onclick="saveData()">บันทึกข้อมูล</button></div>
       </div>
@@ -879,6 +879,19 @@
       if (houseId11.length !== 11) {
         alert("⚠️ รหัสประจำบ้านต้องมี 11 หลักพอดี (ปัจจุบันกรอกมา " + houseId11.length + " หลัก)");
         return;
+      }
+
+      // 🌟 ตรวจสอบพิกัดที่กรอกเอง ให้เป็นตัวเลขและอยู่ในช่วงพิกัดของประเทศไทยตามสมควร (กันพิมพ์ผิด/สลับละติจูด-ลองจิจูด)
+      var latVal = document.getElementById('editLat').value.trim();
+      var lngVal = document.getElementById('editLng').value.trim();
+      if (latVal || lngVal) {
+        var latNum = parseFloat(latVal), lngNum = parseFloat(lngVal);
+        if (!latVal || !lngVal || isNaN(latNum) || isNaN(lngNum)) {
+          alert("⚠️ กรุณากรอกพิกัดละติจูดและลองจิจูดให้ครบทั้งสองช่อง เป็นตัวเลขเท่านั้น"); return;
+        }
+        if (latNum < 5 || latNum > 21 || lngNum < 97 || lngNum > 106) {
+          if (!confirm("⚠️ พิกัดที่กรอก (" + latNum + ", " + lngNum + ") ดูเหมือนจะอยู่นอกประเทศไทย หรืออาจสลับช่องละติจูด/ลองจิจูดกัน ต้องการบันทึกต่อหรือไม่?")) return;
+        }
       }
 
       btn.disabled = true; var origText = btn.innerHTML; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังตรวจสอบ...';
